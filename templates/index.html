@@ -16,7 +16,9 @@
     <p><strong>Date:</strong>
       {{ item.date }}
     </p>
-    <img src="{{ url_for('serve_image', img_name=item.thumbnail) }}" alt="{{ item.title }}">
+    {% if item.thumbnail %}
+    <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
+    {% endif %}
     <p><strong>Description:</strong>
       {{ item.description }}
     </p>

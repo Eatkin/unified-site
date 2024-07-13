@@ -61,7 +61,7 @@ def parse_markdown(blob):
 def get_og_tags(metadata):
     # Get the Open Graph tags from a metadata dictionary
     og_tags = {}
-    for tags in ['og_title', 'og_description', 'og_image']:
+    for tags in ['og_title', 'og_description', 'og_image', 'og_type']:
         if tags in metadata:
             og_tags[tags.replace('og_', 'og:')] = metadata[tags]
     return og_tags if og_tags else None
@@ -74,7 +74,7 @@ def parse_metadata(metadata, blob_name):
             split_line = line.split(':')
             key = split_line[0].strip()
             # Remove the quotes
-            value = ":".join(split_line[1:]).strip()[1:-1]
+            value = ":".join(split_line[1:]).strip()
             metadata_dict[key.strip()] = value
 
     # Add a key for filename for linking
@@ -138,8 +138,12 @@ def blog(blog_name):
     metadata, content = parse_markdown(blob)
     og_tags = get_og_tags(metadata)
 
+    # Get title and date from the metadata
+    title = metadata['title']
+    date = metadata['date']
+
     # Render blog template
-    return render_template('blog.html', content=content, og_tags=og_tags)
+    return render_template('blog.html', content=content, og_tags=og_tags, title=title, date=date)
 
 @app.route('/')
 def index():
