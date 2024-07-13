@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Edward Atkin</h1>
+<div id="feed">
+  {% for item in feed %}
+  <div class="feed-item">
+    <h2>
+      <a href="{{ item.url }}">
+        {{ item.title }}
+      </a>
+    </h2>
+    <p><strong>Author:</strong>
+      {{ item.author }}
+    </p>
+    <p><strong>Date:</strong>
+      {{ item.date }}
+    </p>
+    <img src="{{ url_for('serve_image', img_name=item.thumbnail) }}" alt="{{ item.title }}">
+    <p><strong>Description:</strong>
+      {{ item.description }}
+    </p>
+    <p><strong>Tags:</strong>
+      {{ item.tags }}
+    </p>
+    <div>
+      {{ item.html | safe }}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
