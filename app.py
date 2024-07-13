@@ -6,6 +6,8 @@ from google.cloud import storage
 from firebase_admin import firestore, initialize_app
 import marko
 
+from utils.md_parser import markdown_parser
+
 # Establish a connection to the Google Cloud Storage and Firestore
 storage_client = storage.Client()
 bucket = storage_client.bucket('website-content12345')
@@ -18,12 +20,32 @@ ITEMS_PER_PAGE = 10
 app = Flask(__name__)
 
 def get_blob(blob_type, name):
-    print("Path: ", os.path.join(blob_type, name))
-    blob = bucket.blob(os.path.join(blob_type, name) + ".md")
-    if not blob.exists():
-        print("Blob does not exist")
-        abort(404)
-    return blob
+    # Can cycle through the blob types and extensions to get the correct blob
+    try:
+        extensions = {
+            "blogs": [".md"],
+            "images": [".png", ".jpg", ".jpeg", ".gif"]
+        }
+        # If extension is known then use it
+        if name.endswith(tuple(extensions[blob_type])):
+            blob = bucket.blob(os.path.join(blob_type, name))
+            if not blob.exists():
+                print(f"Blob {name} not found")
+                abort(404)
+            return blob
+
+        # Otherwise cycle through the extensions
+        for ext in extensions[blob_type]:
+            blob = bucket.blob(os.path.join(blob_type, name) + ext)
+            if not blob.exists():
+                continue
+        if not blob.exists():
+            print(f"Blob {name} not found")
+            abort(404)
+        return blob
+    except Exception as e:
+        print(e)
+        abort(500, e)
 
 def parse_markdown(blob):
     # Parse the markdown content into metadata and content
@@ -32,7 +54,7 @@ def parse_markdown(blob):
     metadata = md.split('---')[1]
     metadata = parse_metadata(metadata, blob.name)
     content = md.split('---')[2]
-    content = marko.convert(content)
+    content = markdown_parser.convert(content)
 
     return metadata, content
 
@@ -99,10 +121,7 @@ def get_feed(page=1):
 def serve_image(img_name):
     try:
         # Strip the images/ prefix if it exists
-        blob = bucket.blob(os.path.join("images", img_name))
-        # Ensure the blob exists before attempting to serve it
-        if not blob.exists():
-            abort(404)
+        blob = get_blob('images', img_name)
 
         # Use send_file to send the image file directly
         img_bytes = blob.download_as_bytes()
@@ -110,12 +129,6 @@ def serve_image(img_name):
         return send_file(img_file, mimetype=blob.content_type)
     except Exception as e:
         abort(500, e)
-
-@app.route('/')
-def index():
-    # Get the first page of the feed
-    feed = get_feed()
-    return render_template('index.html', feed=feed)
 
 # Content routes
 @app.route('/blog/<blog_name>')
@@ -127,6 +140,13 @@ def blog(blog_name):
 
     # Render blog template
     return render_template('blog.html', content=content, og_tags=og_tags)
+
+@app.route('/')
+def index():
+    # Get the first page of the feed
+    feed = get_feed()
+    return render_template('index.html', feed=feed)
+
 
 
 
