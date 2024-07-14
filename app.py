@@ -4,9 +4,9 @@ from io import BytesIO
 from flask import Flask, render_template, send_file, abort
 from google.cloud import storage
 from firebase_admin import firestore, initialize_app
-import marko
 
 from utils.md_parser import markdown_parser
+from utils.string_utils import strip_punctuation
 
 # Establish a connection to the Google Cloud Storage and Firestore
 storage_client = storage.Client()
@@ -20,7 +20,7 @@ ITEMS_PER_PAGE = 10
 app = Flask(__name__)
 
 def get_blob(blob_type, name):
-    # Can cycle through the blob types and extensions to get the correct blob
+    """Get a blob from Google Cloud Storage or abort with a 404 if not found"""
     try:
         blob = bucket.blob(os.path.join(blob_type, name))
         if not blob.exists():
@@ -35,6 +35,7 @@ def get_blob(blob_type, name):
 # TODO: These next 4 functions have a lot of redundancy - like parse_metadata and get_description
 # Get description is VERY similar to parse_markdown - can we refactor this? Yes probably
 def parse_markdown(blob):
+    """Parse a markdown blob into metadata and content"""
     # Parse the markdown content into metadata and content
     md = blob.download_as_string().decode('utf-8')
     # We can capture the section between --- and --- and use it as metadata
@@ -46,6 +47,7 @@ def parse_markdown(blob):
     return metadata, content
 
 def parse_music(content):
+    """Parse a music markdown blob into metadata, content and track listing"""
     # Split on --- to get metadata, content and track listing
     md = content.download_as_string().decode('utf-8')
     metadata = md.split('---')[1]
@@ -63,6 +65,7 @@ def parse_music(content):
     }
 
 def parse_track_listing(track_listing):
+    """Parse a track listing string into a list of dictionaries with title and file"""
     lines = track_listing.split('\n')
 
     # Strip any empty lines
@@ -81,8 +84,35 @@ def parse_track_listing(track_listing):
 
     return tracks
 
+def get_collection_navigation(metadata, blob_name):
+    """Return next, prev, first and last items in a collection of content"""
+    # Get the raw file name from the blob name
+    blob_name = blob_name.split('/')[-1]
+    # Get the collection from metadata
+    collection = metadata['collection']
+    # Strip punctuation, lowercase, replace spaces with underscores
+    collection = strip_punctuation(collection.lower()).replace(' ', '_')
+    # Request the collection from Firestore
+    data = db.collection('collections').document(collection).get().to_dict()
+    print(data)
+    idx = data['content'].index(blob_name)
+
+    # Now remove file extensions from the names
+    data['content'] = [blob.split('.')[0] for blob in data['content']]
+
+    if len(data['content']) == 1:
+        return None
+
+    return {
+        'prev': data['content'][idx-1] if idx > 0 else None,
+        'next': data['content'][idx+1] if idx < len(data['content'])-1 else None,
+        'first': data['content'][0] if idx > 0 else None,
+        'last': data['content'][-1] if idx < len(data['content'])-1 else None
+    }
+
 
 def get_og_tags(metadata):
+    """Get Open Graph tags from metadata"""
     # Get the Open Graph tags from a metadata dictionary
     og_tags = {}
     for tags in ['og_title', 'og_description', 'og_image', 'og_type']:
@@ -91,6 +121,7 @@ def get_og_tags(metadata):
     return og_tags if og_tags else None
 
 def parse_metadata(metadata, blob_name):
+    """Parse the metadata section of a markdown file and return a dictionary"""
     # Parse the metadata section of the markdown file and return a dictionary
     metadata_dict = {}
     for line in metadata.split('\n'):
@@ -108,6 +139,7 @@ def parse_metadata(metadata, blob_name):
     return metadata_dict
 
 def get_description(blob):
+    """Get the description from a markdown blob for the feed"""
     # Get the description from a markdown blob for the feed
     md = blob.download_as_string().decode('utf-8')
     # We can capture the section between --- and --- and use it as metadata
@@ -117,11 +149,13 @@ def get_description(blob):
     return description
 
 def get_feed(page=1):
+    """Get a page of the feed from Firestore"""
     # Get the feed from Firestore
     feed = db.collection('feed').document('content-log')
     data = feed.get().to_dict()
 
     # Sort by key (timestamp) desc
+    # Order is not guaranteed in Firestore so we need to sort it here
     data = dict(sorted(data.items(), key=lambda item: item[0], reverse=True))
 
     # Select keys for pagination
@@ -174,9 +208,13 @@ def blog(blog_name):
     # Get title and date from the metadata
     title = metadata['title']
     date = metadata['date']
+    collection = metadata['collection']
+
+    # Get the navigation for the collection
+    navigation = get_collection_navigation(metadata, blob.name)
 
     # Render blog template
-    return render_template('blog.html', content=content, og_tags=og_tags, title=title, date=date)
+    return render_template('blog.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection)
 
 @app.route('/music/<collection_name>')
 def music(collection_name):
