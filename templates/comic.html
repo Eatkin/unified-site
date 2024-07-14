@@ -8,7 +8,15 @@
   {{ date }}
 </date>
 
-{{ content | safe }}
+{% if description %}
+<p>
+  {{ description }}
+</p>
+{% endif %}
+
+<div class="comic">
+  {{ content | safe }}
+</div>
 
 {% if navigation %}
 <div class="nav">

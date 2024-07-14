@@ -226,13 +226,19 @@ def comic(comic_name):
     # Get title and date from the metadata
     title = metadata['title']
     date = metadata['date']
+    description = metadata['description']
     collection = metadata['collection']
 
     # Get the navigation for the collection
     navigation = get_collection_navigation(metadata, blob.name)
+    hover_text = metadata['hover_text'] if 'hover_text' in metadata else None
+
+    # Add hover text to images
+    if hover_text:
+        content = content.replace('<img', f'<img title="{hover_text}"')
 
     # Render blog template
-    return render_template('comic.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection)
+    return render_template('comic.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, description=description)
 
 @app.route('/music/<collection_name>')
 def music(collection_name):

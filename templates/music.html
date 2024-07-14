@@ -4,6 +4,9 @@
 <h2 class="'album-title">
   {{ title }}
 </h2>
+<date class="album-date">
+  {{ date }}
+</date>
 
 {{ content | safe }}
 
@@ -26,7 +29,9 @@
     <p>Enable JavaScript to play audio.</p>
   </noscript>
   <ul class="playlist">
+    {% if album_art %}
     <img src="{{ album_art }}" alt="Album cover">
+    {% endif %}
     {% for track in tracks %}
     <li onclick="playTrack('{{ track.file }}')">
       <span class="track-title">

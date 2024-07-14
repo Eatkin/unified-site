@@ -110,6 +110,8 @@ Content is stored in a Google Cloud Storage bucket with the following structure:
 
 ### Blog
 
+Blog posts provide the basis for what metadata is expected for other content types. Only additional metadata for other content types will be listed.
+
 Blog posts are expected to have the following metadata:
 * title
 * author
@@ -124,22 +126,15 @@ Blog posts are expected to have the following metadata:
 * og_type (OPTIONAL)
 * collection
 
+### Comic
+
+Comics are identical to blog posts but with the additional metadata:
+* hover_text (OPTIONAL)
+
 ### Music
 
-Music posts are expected to have the following metadata:
-* title
-* author
-* date
-* tags
-* description
-* type
-* album_art
-* thumbnail (OPTIONAL)
-* og_title (OPTIONAL)
-* og_description (OPTIONAL)
-* og_image (OPTIONAL)
-* og_type (OPTIONAL)
-* collection
+Music pages are identical to blog posts but with the additional metadata:
+* album_art (OPTIONAL)
 
 In addition to the metadata, music posts are expected to have a list of songs with the following format:
 
