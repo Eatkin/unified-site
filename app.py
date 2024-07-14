@@ -22,23 +22,7 @@ app = Flask(__name__)
 def get_blob(blob_type, name):
     # Can cycle through the blob types and extensions to get the correct blob
     try:
-        extensions = {
-            "blogs": [".md"],
-            "images": [".png", ".jpg", ".jpeg", ".gif"]
-        }
-        # If extension is known then use it
-        if name.endswith(tuple(extensions[blob_type])):
-            blob = bucket.blob(os.path.join(blob_type, name))
-            if not blob.exists():
-                print(f"Blob {name} not found")
-                abort(404)
-            return blob
-
-        # Otherwise cycle through the extensions
-        for ext in extensions[blob_type]:
-            blob = bucket.blob(os.path.join(blob_type, name) + ext)
-            if not blob.exists():
-                continue
+        blob = bucket.blob(os.path.join(blob_type, name))
         if not blob.exists():
             print(f"Blob {name} not found")
             abort(404)
@@ -47,6 +31,9 @@ def get_blob(blob_type, name):
         print(e)
         abort(500, e)
 
+
+# TODO: These next 4 functions have a lot of redundancy - like parse_metadata and get_description
+# Get description is VERY similar to parse_markdown - can we refactor this? Yes probably
 def parse_markdown(blob):
     # Parse the markdown content into metadata and content
     md = blob.download_as_string().decode('utf-8')
@@ -57,6 +44,43 @@ def parse_markdown(blob):
     content = markdown_parser.convert(content)
 
     return metadata, content
+
+def parse_music(content):
+    # Split on --- to get metadata, content and track listing
+    md = content.download_as_string().decode('utf-8')
+    metadata = md.split('---')[1]
+    metadata = parse_metadata(metadata, content.name)
+    content = md.split('---')[2]
+    content = markdown_parser.convert(content)
+    track_listing = md.split('---')[3]
+    track_listing = parse_track_listing(track_listing)
+
+    # Now we need to return a dict with metadata, content and track listing
+    return {
+        'metadata': metadata,
+        'content': content,
+        'track_listing': track_listing
+    }
+
+def parse_track_listing(track_listing):
+    lines = track_listing.split('\n')
+
+    # Strip any empty lines
+    lines = [line for line in lines if line]
+
+    tracks = []
+    for i in range(0, len(lines), 2):
+        title = lines[i].replace('title:', '').strip()
+        file = lines[i+1].replace('file:', '').strip()
+        tracks.append(
+            {
+                'title': title,
+                'file': file
+            }
+        )
+
+    return tracks
+
 
 def get_og_tags(metadata):
     # Get the Open Graph tags from a metadata dictionary
@@ -120,7 +144,6 @@ def get_feed(page=1):
 @app.route('/assets/images/<img_name>')
 def serve_image(img_name):
     try:
-        # Strip the images/ prefix if it exists
         blob = get_blob('images', img_name)
 
         # Use send_file to send the image file directly
@@ -130,11 +153,21 @@ def serve_image(img_name):
     except Exception as e:
         abort(500, e)
 
+@app.route('/assets/music/<filename>')
+def get_music(filename):
+    try:
+        blob = get_blob('music', filename)
+        audio_bytes = blob.download_as_bytes()
+        audio_stream = BytesIO(audio_bytes)
+        return send_file(audio_stream, mimetype=blob.content_type)
+    except Exception as e:
+        abort(500, e)
+
 # Content routes
 @app.route('/blog/<blog_name>')
 def blog(blog_name):
     # We want to get the markdown content, render it and pass the html to the template
-    blob = get_blob('blogs', blog_name)
+    blob = get_blob('blogs', blog_name + '.md')
     metadata, content = parse_markdown(blob)
     og_tags = get_og_tags(metadata)
 
@@ -144,6 +177,23 @@ def blog(blog_name):
 
     # Render blog template
     return render_template('blog.html', content=content, og_tags=og_tags, title=title, date=date)
+
+@app.route('/music/<collection_name>')
+def music(collection_name):
+    # Get the music collection
+    blob = get_blob('music', collection_name + '.md')
+
+    data = parse_music(blob)
+
+    og_tags = get_og_tags(data['metadata'])
+    title = data['metadata']['title']
+    content = data['content']
+    tracks = data['track_listing']
+    album_art = data['metadata']['og_image']
+
+    # Render music template
+    return render_template('music.html', content=content, og_tags=og_tags, title=title, tracks=tracks, album_art=album_art)
+
 
 @app.route('/')
 def index():
