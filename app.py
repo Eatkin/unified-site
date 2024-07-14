@@ -216,6 +216,24 @@ def blog(blog_name):
     # Render blog template
     return render_template('blog.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection)
 
+@app.route('/comic/<comic_name>')
+def comic(comic_name):
+    # Very similar to blog but uses an alternative template
+    blob = get_blob('comics', comic_name + '.md')
+    metadata, content = parse_markdown(blob)
+    og_tags = get_og_tags(metadata)
+
+    # Get title and date from the metadata
+    title = metadata['title']
+    date = metadata['date']
+    collection = metadata['collection']
+
+    # Get the navigation for the collection
+    navigation = get_collection_navigation(metadata, blob.name)
+
+    # Render blog template
+    return render_template('comic.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection)
+
 @app.route('/music/<collection_name>')
 def music(collection_name):
     # Get the music collection

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="'blog-title">
+  {{ title }}
+</h2>
+<date class="blog-date">
+  {{ date }}
+</date>
+
+{{ content | safe }}
+
+{% if navigation %}
+<div class="nav">
+  <p>More from
+    {{ collection }}
+  </p>
+  {% if navigation.first %}
+  <a href="{{ url_for('comic', comic_name=navigation.first) }}"><img src="{{ url_for('serve_image', img_name='comic_first.png') }}"></a>
+  {% endif %}
+  {% if navigation.prev %}
+  <a href="{{ url_for('comic', comic_name=navigation.prev) }}"><img src="{{ url_for('serve_image', img_name='comic_prev.png') }}"></a>
+  {% endif %}
+  {% if navigation.next %}
+  <a href="{{ url_for('comic', comic_name=navigation.next) }}"><img src="{{ url_for('serve_image', img_name='comic_next.png') }}"></a>
+  {% endif %}
+  {% if navigation.last %}
+  <a href="{{ url_for('comic', comic_name=navigation.last) }}"><img src="{{ url_for('serve_image', img_name='comic_last.png') }}"></a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}
