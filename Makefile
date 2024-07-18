@@ -16,3 +16,6 @@ stop:
 	else \
 		echo "No tmux session named '$(TMUX_SESSION_NAME)' found."; \
 	fi
+
+submit_build:
+	gcloud builds submit --tag europe-west2-docker.pkg.dev/homepage-428615/homepage/homepage:latest

@@ -8,7 +8,9 @@
   {{ date }}
 </date>
 
-{{ content | safe }}
+<article class="blog-content">
+  {{ content | safe }}
+</article>
 
 {% if navigation %}
 <div class="nav">

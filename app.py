@@ -1,7 +1,7 @@
 import os
 from io import BytesIO
 
-from flask import Flask, render_template, send_file, abort
+from flask import Flask, render_template, send_file, abort, request
 from google.cloud import storage
 from firebase_admin import firestore, initialize_app
 
@@ -94,7 +94,6 @@ def get_collection_navigation(metadata, blob_name):
     collection = strip_punctuation(collection.lower()).replace(' ', '_')
     # Request the collection from Firestore
     data = db.collection('collections').document(collection).get().to_dict()
-    print(data)
     idx = data['content'].index(blob_name)
 
     # Now remove file extensions from the names
@@ -158,9 +157,11 @@ def get_feed(page=1):
     # Order is not guaranteed in Firestore so we need to sort it here
     data = dict(sorted(data.items(), key=lambda item: item[0], reverse=True))
 
+    num_pages = len(data) // ITEMS_PER_PAGE
+
     # Select keys for pagination
     start = (page-1)*ITEMS_PER_PAGE
-    end = page*ITEMS_PER_PAGE+1
+    end = page*ITEMS_PER_PAGE
     page_keys = list(data.keys())[start:end]
 
     data = {k: v for k, v in data.items() if k in page_keys}
@@ -172,7 +173,17 @@ def get_feed(page=1):
         blob = bucket.blob(value['location'])
         feed.append(get_description(blob))
 
-    return feed
+    return {
+        'feed': feed,
+        'pagination': {
+            'page_count': num_pages,
+            'has_next': page < num_pages,
+            'has_prev': page > 1,
+            'prev_num': page-1,
+            'next_num': page+1,
+            'page': page
+        }
+    }
 
 # Data routes
 @app.route('/assets/images/<img_name>')
@@ -256,12 +267,38 @@ def music(collection_name):
     # Render music template
     return render_template('music.html', content=content, og_tags=og_tags, title=title, tracks=tracks, album_art=album_art)
 
+@app.route('/video/<video_name>')
+def video(video_name):
+    # Get the video content
+    blob = get_blob('videos', video_name + '.md')
+
+    metadata, video_id = parse_markdown(blob)
+    # Strip html tags from the video_id
+    video_id = video_id.replace('<p>', '').replace('</p>', '').strip()
+    og_tags = get_og_tags(metadata)
+
+    # Get title and date from the metadata
+    title = metadata['title']
+    date = metadata['date']
+    collection = metadata['collection']
+    description = metadata['description']
+
+    # Get the navigation for the collection
+    navigation = get_collection_navigation(metadata, blob.name)
+
+    # Render blog template
+    return render_template('video.html', video_id=video_id, description=description, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection)
+
+
 
 @app.route('/')
 def index():
+    page = request.args.get('page', 1, type=int)
     # Get the first page of the feed
-    feed = get_feed()
-    return render_template('index.html', feed=feed)
+    feed_dict = get_feed(page=page)
+    feed = feed_dict['feed']
+    pagination = feed_dict['pagination']
+    return render_template('index.html', feed=feed, pagination=pagination)
 
 
 

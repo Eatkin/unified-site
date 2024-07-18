@@ -8,7 +8,9 @@
   {{ date }}
 </date>
 
-{{ content | safe }}
+<article class="album-content">
+  {{ content | safe }}
+</article>
 
 <div class="player">
   <audio id="audioPlayer" controls>

@@ -1,2 +1,5 @@
 Flask
 marko
+gunicorn
+google-cloud-storage
+firebase-admin
