@@ -20,7 +20,9 @@
       {{ item.date }}
     </p>
     {% if item.thumbnail %}
-    <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
+    <a href="{{ item.url }}" target="_blank">
+      <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
+    </a>
     {% endif %}
     <p><strong>Description:</strong>
       {{ item.description }}
