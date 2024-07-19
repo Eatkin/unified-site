@@ -52,16 +52,16 @@
     {{ collection }}
   </p>
   {% if navigation.first %}
-  <a href="{{ url_for('blog', blog_name=navigation.first) }}">First post</a>
+  <a href="{{ url_for('music', music_name=navigation.first) }}">First post</a>
   {% endif %}
   {% if navigation.prev %}
-  <a href="{{ url_for('blog', blog_name=navigation.prev) }}">Previous post</a>
+  <a href="{{ url_for('music', music_name=navigation.prev) }}">Previous post</a>
   {% endif %}
   {% if navigation.next %}
-  <a href="{{ url_for('blog', blog_name=navigation.next) }}">Next post</a>
+  <a href="{{ url_for('music', music_name=navigation.next) }}">Next post</a>
   {% endif %}
   {% if navigation.last %}
-  <a href="{{ url_for('blog', blog_name=navigation.last) }}">Last post</a>
+  <a href="{{ url_for('music', music_name=navigation.last) }}">Last post</a>
   {% endif %}
 </div>
 {% endif %}
