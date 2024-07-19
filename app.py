@@ -158,6 +158,7 @@ def get_feed(page=1):
     data = dict(sorted(data.items(), key=lambda item: item[0], reverse=True))
 
     num_pages = len(data) // ITEMS_PER_PAGE
+    num_pages += 1 if len(data) % ITEMS_PER_PAGE else 0
 
     # Select keys for pagination
     start = (page-1)*ITEMS_PER_PAGE
@@ -172,6 +173,8 @@ def get_feed(page=1):
     for key, value in data.items():
         blob = bucket.blob(value['location'])
         feed.append(get_description(blob))
+        # Use the key as the timestamp
+        feed[-1]['date'] = key
 
     return {
         'feed': feed,
@@ -263,9 +266,12 @@ def music(collection_name):
     content = data['content']
     tracks = data['track_listing']
     album_art = data['metadata']['og_image']
+    collection = data['metadata']['collection']
+
+    navigation = get_collection_navigation(data['metadata'], blob.name)
 
     # Render music template
-    return render_template('music.html', content=content, og_tags=og_tags, title=title, tracks=tracks, album_art=album_art)
+    return render_template('music.html', content=content, og_tags=og_tags, title=title, tracks=tracks, album_art=album_art, navigation=navigation, collection=collection)
 
 @app.route('/video/<video_name>')
 def video(video_name):
