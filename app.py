@@ -19,12 +19,21 @@ ITEMS_PER_PAGE = 10
 
 app = Flask(__name__)
 
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('error.html', error=error), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('error.html', error=error), 500
+
 def get_blob(blob_type, name):
     """Get a blob from Google Cloud Storage or abort with a 404 if not found"""
     try:
         blob = bucket.blob(os.path.join(blob_type, name))
         if not blob.exists():
             print(f"Blob {name} not found")
+            # Render error page
             abort(404)
         return blob
     except Exception as e:

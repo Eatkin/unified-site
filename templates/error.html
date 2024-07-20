@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Oh no! There has been an error.</h2>
+<p>The page you are looking for either doesn't exist or Ed has broken something (again).</p>
+<p>Please enjoy this photo of a really broken public bench instead.</p>
+
+<img src="{{ url_for('serve_image', img_name='error_page.jpg') }}" alt="Error page image" title="I am Error" />
+
+{% endblock %}
