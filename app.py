@@ -142,7 +142,10 @@ def parse_metadata(metadata, blob_name):
 
     # Add a key for filename for linking
     metadata_dict['filename'] = blob_name.split('/')[-1].split('.')[0]
-    metadata_dict['url'] = os.path.join(metadata_dict['type'], metadata_dict['filename'])
+    try:
+        metadata_dict['url'] = os.path.join(metadata_dict['type'], metadata_dict['filename'])
+    except:
+        print(f"Error parsing metadata for {blob_name}")
 
     return metadata_dict
 
@@ -223,20 +226,20 @@ def get_music(filename):
 # Content routes
 @app.route('/blog/<blog_name>')
 def blog(blog_name):
-    # We want to get the markdown content, render it and pass the html to the template
+    # we want to get the markdown content, render it and pass the html to the template
     blob = get_blob('blogs', blog_name + '.md')
     metadata, content = parse_markdown(blob)
     og_tags = get_og_tags(metadata)
 
-    # Get title and date from the metadata
+    # get title and date from the metadata
     title = metadata['title']
     date = metadata['date']
     collection = metadata['collection']
 
-    # Get the navigation for the collection
+    # get the navigation for the collection
     navigation = get_collection_navigation(metadata, blob.name)
 
-    # Render blog template
+    # render blog template
     return render_template('blog.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection)
 
 @app.route('/comic/<comic_name>')
@@ -303,6 +306,26 @@ def video(video_name):
 
     # Render blog template
     return render_template('video.html', video_id=video_id, description=description, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection)
+
+@app.route('/game/<game_name>')
+def game(game_name):
+    # we want to get the markdown content, render it and pass the html to the template
+    blob = get_blob('games', game_name + '.md')
+    metadata, content = parse_markdown(blob)
+    og_tags = get_og_tags(metadata)
+
+    # get title and date from the metadata
+    title = metadata['title']
+    date = metadata['date']
+    collection = metadata['collection']
+    cover_art = metadata['og_image']
+    game_link = metadata['game_link']
+
+    # get the navigation for the collection
+    navigation = get_collection_navigation(metadata, blob.name)
+
+    # render blog template
+    return render_template('game.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, cover_art=cover_art, game_link=game_link)
 
 
 
