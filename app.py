@@ -235,10 +235,16 @@ def get_music(filename):
         abort(500, e)
 
 # Content routes
+@app.route('/project/<project_name>')
 @app.route('/blog/<blog_name>')
-def blog(blog_name):
+def blog(blog_name=None, project_name=None):
     # we want to get the markdown content, render it and pass the html to the template
-    blob = get_blob('blogs', blog_name + '.md')
+    # Project/blog routes are the same just use different types in the metadata
+    if blog_name:
+        blob = get_blob('blogs', blog_name + '.md')
+    elif project_name:
+        blob = get_blob('projects', project_name + '.md')
+
     metadata, content = parse_markdown(blob)
     og_tags = get_og_tags(metadata)
 

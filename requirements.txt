@@ -3,4 +3,4 @@ marko
 gunicorn
 google-cloud-storage
 firebase-admin
-PIL
+pillow

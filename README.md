@@ -11,6 +11,7 @@ Routes implemented allow for:
 * Music albums/playlists
 * Comics
 * Youtube videos
+* Games
 
 ## Current Status
 
