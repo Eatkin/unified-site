@@ -9,6 +9,12 @@ All content is rendered from markdown files
 Routes implemented allow for:
 * Blog posts
 * Music albums/playlists
+* Comics
+* Youtube videos
+
+## Current Status
+
+I'm working on it. This README is probably out of date if you're reading this. I'll have it organised at some point but I'm working on the actual site first.
 
 ## Project Structure
 
@@ -25,6 +31,8 @@ Content is stored in a Google Cloud Storage bucket and accessed via the Google C
 Feed data is stored in a Firestore database and accessed via the Firestore API.
 
 Collection data is also stored in a Firestore database and accessed via the Firestore API.
+
+Various content management scripts are included in the content_management diretory including updating metadata from markdown files, creating thumbnails from images, etc.
 
 ## Expected Markdown Format
 
@@ -59,14 +67,16 @@ The firestore database is used to store feed data and collection data. It contai
 
 ### Feed Collection
 
-This collection contains a single document 'content-log'. It is intended to contain the location of content alongside a timestamp. It is structured of the form:
+This collection contains a single document 'content-log'. It is intended to contain the location of content, associated metadata and a timestamp as the key. It is structured of the form:
 
 ```json
 {'2023-03-05 13:30:15': {
   'location': 'blogs/blog1.md',
+  'metadata_key': 'some_metadata'
 },
 {'2023-03-05 13:30:15': {
   'location': 'music/album1.md',
+  'metadata_key': 'some_metadata'
 }
 }
 ```

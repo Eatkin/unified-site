@@ -128,6 +128,7 @@ def get_og_tags(metadata):
             og_tags[tags.replace('og_', 'og:')] = metadata[tags]
     return og_tags if og_tags else None
 
+
 def parse_metadata(metadata, blob_name):
     """Parse the metadata section of a markdown file and return a dictionary"""
     # Parse the metadata section of the markdown file and return a dictionary
@@ -149,18 +150,9 @@ def parse_metadata(metadata, blob_name):
 
     return metadata_dict
 
-def get_description(blob):
-    """Get the description from a markdown blob for the feed"""
-    # Get the description from a markdown blob for the feed
-    md = blob.download_as_string().decode('utf-8')
-    # We can capture the section between --- and --- and use it as metadata
-    metadata = md.split('---')[1]
-
-    description = parse_metadata(metadata, blob.name)
-    return description
-
-def get_feed(page=1):
-    """Get a page of the feed from Firestore"""
+def get_feed(filters={}, page=1):
+    """Get a page of the feed from Firestore
+    Filters is a dictionary of filters to be applied to the feed based on doc metadata"""
     # Get the feed from Firestore
     feed = db.collection('feed').document('content-log')
     data = feed.get().to_dict()
@@ -169,24 +161,43 @@ def get_feed(page=1):
     # Order is not guaranteed in Firestore so we need to sort it here
     data = dict(sorted(data.items(), key=lambda item: item[0], reverse=True))
 
-    num_pages = len(data) // ITEMS_PER_PAGE
-    num_pages += 1 if len(data) % ITEMS_PER_PAGE else 0
-
-    # Select keys for pagination
+    # Loop over the data and filter it
     start = (page-1)*ITEMS_PER_PAGE
     end = page*ITEMS_PER_PAGE
-    page_keys = list(data.keys())[start:end]
-
-    data = {k: v for k, v in data.items() if k in page_keys}
-
     feed = []
+    feed_length = 0
+    feed_index = 0
+    for k, v in data.items():
+        # Filters should contain a key (metadata value) and a list of possible values
+        pass_filter = True
+        for key, values in filters.items():
+            # Tags are a list so we need to check if all the values are in the tags
+            # We want at least ONE tag to be in the tags
+            if key == 'tags':
+                if not any(tag in values for tag in v[key]):
+                    pass_filter = False
+                    break
+            elif key == 'collection':
+                # Process the collection name
+                clean_collection_name = strip_punctuation(v[key]).replace(' ', '_').lower()
+                if clean_collection_name not in values:
+                    pass_filter = False
+                    break
+            elif v[key] not in values:
+                pass_filter = False
+                break
 
-    # Go through these, get description from location and replace the value with the description returned
-    for key, value in data.items():
-        blob = bucket.blob(value['location'])
-        feed.append(get_description(blob))
-        # Use the key as the timestamp
-        feed[-1]['date'] = key
+        if pass_filter:
+            feed_index += 1
+            if feed_index > start and feed_index <= end:
+                feed_length += 1
+                feed.append(v)
+                feed[-1]['date'] = k
+
+    # Feed index contains the number of items that pass the filter
+    num_pages = feed_index // ITEMS_PER_PAGE
+    num_pages += 1 if feed_index % ITEMS_PER_PAGE else 0
+
 
     return {
         'feed': feed,
@@ -332,8 +343,29 @@ def game(game_name):
 @app.route('/')
 def index():
     page = request.args.get('page', 1, type=int)
+    tags = request.args.get('tags', None)
+    content_type = request.args.get('type', None)
+    collection = request.args.get('collection', None)
+
+    # Split them on commas
+    tags = tags.split(',') if tags else None
+    content_type = content_type.split(',') if content_type else None
+    collection = collection.split(',') if collection else None
+
+    # Clean collection names (shouldn't need to do this because we construct the GET request ourselves but just in case)
+    collection = [c.lower() for c in collection] if collection else None
+
+
+    # Create a filter dictionary
+    filters = {
+        k: v for k, v in {
+            'tags': tags,
+            'type': content_type,
+            'collection': collection
+        }.items() if v
+    }
     # Get the first page of the feed
-    feed_dict = get_feed(page=page)
+    feed_dict = get_feed(filters=filters, page=page)
     feed = feed_dict['feed']
     pagination = feed_dict['pagination']
     return render_template('index.html', feed=feed, pagination=pagination)

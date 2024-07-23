@@ -1,3 +1,4 @@
+# Tagging utility for a bunch of old blog posts I scraped
 import os
 
 files = os.listdir(os.path.join('STAGING', 'blogs'))
