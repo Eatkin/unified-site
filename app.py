@@ -1,8 +1,8 @@
 import os
-import json
+from random import choice
 from io import BytesIO
 
-from flask import Flask, render_template, send_file, abort, request
+from flask import Flask, render_template, send_file, abort, request, redirect
 from google.cloud import storage
 from firebase_admin import firestore, initialize_app
 
@@ -153,6 +153,14 @@ def parse_metadata(metadata, blob_name):
         print(f"Error parsing metadata for {blob_name}")
 
     return metadata_dict
+
+def get_random_page():
+    feed = db.collection('feed').document('content-log')
+    data = feed.get().to_dict()
+    random_page = choice(list(data.keys()))
+    url = data[random_page]['url']
+
+    return url
 
 def get_feed(filters={}, page=1):
     """Get a page of the feed from Firestore
@@ -395,6 +403,12 @@ def index():
     feed = feed_dict['feed']
     pagination = feed_dict['pagination']
     return render_template('index.html', feed=feed, pagination=pagination)
+
+@app.route('/random')
+def random():
+    url = get_random_page()
+    # Redirect
+    return redirect(url)
 
 
 
