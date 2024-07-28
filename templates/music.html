@@ -1,50 +1,50 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2 class="'album-title">
-  {{ title }}
-</h2>
-<date class="album-date">
-  {{ date }}
-</date>
 
-<article class="album-content">
+<article class="content">
+  <h2 class="'title">
+    {{ title }}
+  </h2>
+  <date class="date">
+    {{ date }}
+  </date>
   {{ content | safe }}
+
+  <div class="player">
+    <audio id="audioPlayer" controls>
+      <source id="audioSource" src="" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+
+    <script>
+      function playTrack(file) {
+        const audioPlayer = document.getElementById('audioPlayer');
+        const source = document.getElementById('audioSource');
+        source.src = file;
+        audioPlayer.load();
+        audioPlayer.play();
+      }
+    </script>
+    <noscript>
+      <p>Enable JavaScript to play audio.</p>
+    </noscript>
+    <ul class="playlist">
+      {% if album_art %}
+      <img src="{{ album_art }}" alt="Album cover" class="album-art">
+      {% endif %}
+      {% for track in tracks %}
+      <li onclick="playTrack('{{ track.file }}')">
+        <span class="track-title">
+          {{ loop.index }}
+          {{ track.title }}
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+
+  </div>
 </article>
-
-<div class="player">
-  <audio id="audioPlayer" controls>
-    <source id="audioSource" src="" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
-
-  <script>
-    function playTrack(file) {
-      const audioPlayer = document.getElementById('audioPlayer');
-      const source = document.getElementById('audioSource');
-      source.src = file;
-      audioPlayer.load();
-      audioPlayer.play();
-    }
-  </script>
-  <noscript>
-    <p>Enable JavaScript to play audio.</p>
-  </noscript>
-  <ul class="playlist">
-    {% if album_art %}
-    <img src="{{ album_art }}" alt="Album cover">
-    {% endif %}
-    {% for track in tracks %}
-    <li onclick="playTrack('{{ track.file }}')">
-      <span class="track-title">
-        {{ loop.index }}
-        {{ track.title }}
-      </span>
-    </li>
-    {% endfor %}
-  </ul>
-
-</div>
 
 {% if navigation %}
 <div class="nav">

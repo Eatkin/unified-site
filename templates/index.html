@@ -1,37 +1,51 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Edward Atkin</h1>
 <div id="feed">
   {% for item in feed %}
   <div class="feed-item">
-    <h2>
+    <div class="flex-row">
+      {% if item.thumbnail %}
       <a href="{{ item.url }}" target="_blank">
-        {{ item.title }}
+        <img class="thumbnail" src="{{ item.thumbnail }}" alt="{{ item.title }}">
       </a>
-    </h2>
-    <h3>
-      {{ item.collection }}
-    </h3>
-    <p><strong>Author:</strong>
-      {{ item.author }}
-    </p>
-    <p><strong>Date:</strong>
-      {{ item.date }}
-    </p>
-    {% if item.thumbnail %}
-    <a href="{{ item.url }}" target="_blank">
-      <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
-    </a>
-    {% endif %}
-    <p><strong>Description:</strong>
-      {{ item.description }}
-    </p>
-    <p><strong>Tags:</strong>
-      {{ item.tags }}
-    </p>
-    <div>
-      {{ item.html | safe }}
+      {% endif %}
+      <div class="flex-column">
+        <h2>
+          <a href="{{ item.url }}" target="_blank">
+            {{ item.title }}
+          </a>
+        </h2>
+        <h3>
+          From
+          {{ item.collection }}
+        </h3>
+      </div>
+    </div>
+    <div class="flex-column">
+      <p><strong>Date:</strong>
+        {{ item.date }}
+      </p>
+      <p><strong>Author:</strong>
+        {{ item.author }}
+      </p>
+      <p class="description">
+        {{ item.description }}
+      </p>
+      <p>
+      <ul class="tags">
+        {% for tag in item.tags %}
+        <a href="{{ url_for('index', tags=tag) }}">
+          <li class="tag">
+            {{ tag }}
+          </li>
+        </a>
+        {% endfor %}
+      </ul>
+      </p>
+      <div>
+        {{ item.html | safe }}
+      </div>
     </div>
   </div>
   {% endfor %}

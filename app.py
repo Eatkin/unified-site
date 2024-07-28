@@ -1,4 +1,5 @@
 import os
+import json
 from io import BytesIO
 
 from flask import Flask, render_template, send_file, abort, request
@@ -40,6 +41,9 @@ def get_blob(blob_type, name):
         print(e)
         abort(500, e)
 
+def clean_tags(tags):
+    """Clean a tag string"""
+    return [strip_punctuation(tag).strip().lower().replace(' ', '-') for tag in tags.split(',')]
 
 # TODO: These next 4 functions have a lot of redundancy - like parse_metadata and get_description
 # Get description is VERY similar to parse_markdown - can we refactor this? Yes probably
@@ -174,7 +178,8 @@ def get_feed(filters={}, page=1):
             # Tags are a list so we need to check if all the values are in the tags
             # We want at least ONE tag to be in the tags
             if key == 'tags':
-                if not any(tag in values for tag in v[key]):
+                tags = clean_tags(v[key])
+                if not any(tag in values for tag in tags):
                     pass_filter = False
                     break
             elif key == 'collection':
@@ -191,6 +196,9 @@ def get_feed(filters={}, page=1):
             feed_index += 1
             if feed_index > start and feed_index <= end:
                 feed_length += 1
+                # Clean tags
+                if 'tags' in v:
+                    v['tags'] = clean_tags(v['tags'])
                 feed.append(v)
                 feed[-1]['date'] = k
 
@@ -236,14 +244,26 @@ def get_music(filename):
 
 # Content routes
 @app.route('/project/<project_name>')
+def project(project_name):
+    blob = get_blob('projects', project_name + '.md')
+    metadata, content = parse_markdown(blob)
+    og_tags = get_og_tags(metadata)
+
+    # get title and date from the metadata
+    title = metadata['title']
+    date = metadata['date']
+    collection = metadata['collection']
+
+    # get the navigation for the collection
+    navigation = get_collection_navigation(metadata, blob.name)
+
+    # render project template
+    return render_template('project.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection)
+
 @app.route('/blog/<blog_name>')
-def blog(blog_name=None, project_name=None):
+def blog(blog_name):
     # we want to get the markdown content, render it and pass the html to the template
-    # Project/blog routes are the same just use different types in the metadata
-    if blog_name:
-        blob = get_blob('blogs', blog_name + '.md')
-    elif project_name:
-        blob = get_blob('projects', project_name + '.md')
+    blob = get_blob('blogs', blog_name + '.md')
 
     metadata, content = parse_markdown(blob)
     og_tags = get_og_tags(metadata)
@@ -375,7 +395,6 @@ def index():
     feed = feed_dict['feed']
     pagination = feed_dict['pagination']
     return render_template('index.html', feed=feed, pagination=pagination)
-
 
 
 

@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2 class="'game-title">
-  {{ title }}
-</h2>
-<date class="game-date">
-  {{ date }}
-</date>
 
-<div class="cover-art">
-  <img src="{{ cover_art }}" alt="{{ title }}">
-</div>
+<article class="content">
+  <h2 class="title">
+    {{ title }}
+  </h2>
+  <date class="date">
+    {{ date }}
+  </date>
 
-<article class="game-content">
+  <div class="cover-art">
+    <img src="{{ cover_art }}" alt="{{ title }}">
+  </div>
   {{ content | safe }}
 
   <p class="game-link">
