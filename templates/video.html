@@ -22,18 +22,28 @@
   <p>More from
     {{ collection }}
   </p>
-  {% if navigation.first %}
-  <a href="{{ url_for('video', video_name=navigation.first) }}">First video</a>
-  {% endif %}
-  {% if navigation.prev %}
-  <a href="{{ url_for('video', video_name=navigation.prev) }}">Previous video</a>
-  {% endif %}
-  {% if navigation.next %}
-  <a href="{{ url_for('video', video_name=navigation.next) }}">Next video</a>
-  {% endif %}
-  {% if navigation.last %}
-  <a href="{{ url_for('video', video_name=navigation.last) }}">Last video</a>
-  {% endif %}
+  <ul class="nav-list">
+    {% if navigation.first %}
+    <li class="nav-item">
+      <a href="{{ url_for('video', video_name=navigation.first) }}">First video</a>
+    </li>
+    {% endif %}
+    {% if navigation.prev %}
+    <li class="nav-item">
+      <a href="{{ url_for('video', video_name=navigation.prev) }}">Previous video</a>
+    </li>
+    {% endif %}
+    {% if navigation.next %}
+    <li class="nav-item">
+      <a href="{{ url_for('video', video_name=navigation.next) }}">Next video</a>
+    </li>
+    {% endif %}
+    {% if navigation.last %}
+    <li class="nav-item">
+      <a href="{{ url_for('video', video_name=navigation.last) }}">Latest video</a>
+    </li>
+    {% endif %}
+  </ul>
 </div>
 {% endif %}
 {% endblock %}

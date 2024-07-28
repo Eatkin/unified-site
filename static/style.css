@@ -55,6 +55,19 @@ a:hover {
   color: #a825ba;
 }
 
+blockquote {
+  background: #54cea7;
+  border: solid 0.2em #2ba4a6;
+  border-radius: 1em;
+  padding: 1em 2em;
+  margin: 1em auto;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  font-style: italic;
+}
+
 #logo {
   display: block;
   margin: auto;
@@ -162,7 +175,7 @@ article {
   border-radius: 1rem;
   border: solid 0.2rem #a825ba;
   font-size: 1.1em;
-  padding-bottom: 8rem;
+  margin-bottom: 8rem;
 }
 
 article img {
@@ -197,6 +210,148 @@ code {
   line-height: 1.5;
 }
 
+/* Worst css ever */
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1em 2em;
+  margin: 1em auto;
+  width: 95%;
+}
+
+.nav p {
+  font-size: 1.2em;
+  font-weight: 700;
+}
+
+.nav-list {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item {
+  display: inline-block;
+  margin: 0 1em;
+}
+
+.nav-item img {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  display: block;
+}
+
+#menu-bar {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.menu-list {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-item {
+  display: inline-block;
+  margin: 0 1em;
+  font-size: 1.2em;
+  transition: color 0.5s;
+}
+
+.menu-item:hover {
+  color: #a825ba;
+}
+
+#pagination {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.pagination-list {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.pagination-list li {
+  transition: transform 0.5s;
+}
+
+.pagination-list li:hover {
+  transform: scale(1.1);
+}
+
+.next-previous {
+  display: inline-block;
+  margin: 0 1em;
+  font-size: 1.2em;
+  transition: color 0.5s;
+}
+
+.next-previous:hover {
+  color: #a825ba;
+}
+
+.num {
+  display: inline-block;
+  margin: 0 1em;
+  font-size: 1.2em;
+  transition: color 0.5s;
+}
+
+.num:hover {
+  color: #a825ba;
+}
+
+.num-current {
+  display: inline-block;
+  margin: 0 1em;
+  font-size: 1.2em;
+  color: #a825ba;
+  text-decoration: underline;
+  text-decoration-style: wavy;
+}
+
+.game-link {
+  display: inline-block;
+  background-color: #ffb0bf;
+  padding: 0.5em 1em;
+  border-radius: 1em;
+  font-size: 1.2em;
+  transition: background-color 0.5s ease, transform 0.5s ease, box-shadow 0.5s ease;
+}
+
+.game-link:hover {
+  background-color: #ff82bd;
+  transform: scale(1.05);
+  cursor: pointer;
+  box-shadow: 0px 4px 8px #0d2417;
+}
+
 
 @media (max-width: 1024px) {
   article {
@@ -210,6 +365,10 @@ code {
   article img {
     width: 100%;
     border-radius: 0;
+  }
+
+  blockquote {
+    width: 90%;
   }
 
   .feed-item {
@@ -238,6 +397,12 @@ code {
   .flex-row img {
     margin: auto;
     display: flex;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.5;
   }
 
 }

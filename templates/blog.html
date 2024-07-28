@@ -10,25 +10,36 @@
     {{ date }}
   </date>
   {{ content | safe }}
+
+  {% if navigation %}
+  <div class="nav">
+    <p>More from
+      {{ collection }}:
+    </p>
+    <ul class="nav-list">
+      {% if navigation.first %}
+      <li class="nav-item">
+        <a href="{{ url_for('blog', blog_name=navigation.first) }}">First post</a>
+      </li>
+      {% endif %}
+      {% if navigation.prev %}
+      <li class="nav-item">
+        <a href="{{ url_for('blog', blog_name=navigation.prev) }}">Previous post</a>
+      </li>
+      {% endif %}
+      {% if navigation.next %}
+      <li class="nav-item">
+        <a href="{{ url_for('blog', blog_name=navigation.next) }}">Next post</a>
+      </li>
+      {% endif %}
+      {% if navigation.last %}
+      <li class="nav-item">
+        <a href="{{ url_for('blog', blog_name=navigation.last) }}">Latest post</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
 </article>
 
-{% if navigation %}
-<div class="nav">
-  <p>More from
-    {{ collection }}
-  </p>
-  {% if navigation.first %}
-  <a href="{{ url_for('blog', blog_name=navigation.first) }}">First post</a>
-  {% endif %}
-  {% if navigation.prev %}
-  <a href="{{ url_for('blog', blog_name=navigation.prev) }}">Previous post</a>
-  {% endif %}
-  {% if navigation.next %}
-  <a href="{{ url_for('blog', blog_name=navigation.next) }}">Next post</a>
-  {% endif %}
-  {% if navigation.last %}
-  <a href="{{ url_for('blog', blog_name=navigation.last) }}">Last post</a>
-  {% endif %}
-</div>
-{% endif %}
 {% endblock %}

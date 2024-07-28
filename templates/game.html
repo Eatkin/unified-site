@@ -19,25 +19,36 @@
     <a href="{{ game_link }}" target="_blank">Play
       {{ title }} at Itch IO!</a>
   </p>
+
+  {% if navigation %}
+  <div class="nav">
+    <p>More from
+      {{ collection }}:
+    </p>
+    <ul class="nav-list">
+      {% if navigation.first %}
+      <li class="nav-item">
+        <a href="{{ url_for('game', game_name=navigation.first) }}">First game</a>
+      </li>
+      {% endif %}
+      {% if navigation.prev %}
+      <li class="nav-item">
+        <a href="{{ url_for('game', game_name=navigation.prev) }}">Previous game</a>
+      </li>
+      {% endif %}
+      {% if navigation.next %}
+      <li class="nav-item">
+        <a href="{{ url_for('game', game_name=navigation.next) }}">Next game</a>
+      </li>
+      {% endif %}
+      {% if navigation.last %}
+      <li class="nav-item">
+        <a href="{{ url_for('game', game_name=navigation.last) }}">Latest game</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
 </article>
 
-{% if navigation %}
-<div class="nav">
-  <p>More from
-    {{ collection }}
-  </p>
-  {% if navigation.first %}
-  <a href="{{ url_for('game', game_name=navigation.first) }}">First game</a>
-  {% endif %}
-  {% if navigation.prev %}
-  <a href="{{ url_for('game', game_name=navigation.prev) }}">Previous game</a>
-  {% endif %}
-  {% if navigation.next %}
-  <a href="{{ url_for('game', game_name=navigation.next) }}">Next game</a>
-  {% endif %}
-  {% if navigation.last %}
-  <a href="{{ url_for('game', game_name=navigation.last) }}">Last game</a>
-  {% endif %}
-</div>
-{% endif %}
 {% endblock %}
