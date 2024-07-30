@@ -52,9 +52,8 @@ def parse_markdown(blob):
     # Parse the markdown content into metadata and content
     md = blob.download_as_string().decode('utf-8')
     # We can capture the section between --- and --- and use it as metadata
-    metadata = md.split('---')[1]
+    _, metadata, content = md.split('---', 2)
     metadata = parse_metadata(metadata, blob.name)
-    content = md.split('---')[2]
     content = markdown_parser.convert(content)
 
     return metadata, content
