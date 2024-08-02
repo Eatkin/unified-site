@@ -11,37 +11,54 @@
   </date>
   {{ content | safe }}
 
-  <div class="player">
-    <audio id="audioPlayer" controls>
-      <source id="audioSource" src="" type="audio/mpeg">
+  <div class="audio-player">
+    {% if album_art %}
+    <div class="flex-row">
+      <div class="album-art">
+        <img src="{{ album_art }}" alt="Album cover">
+      </div>
+      {% endif %}
+      <div class="track-listing">
+        <ul id="track-list">
+          {% for track in tracks %}
+          {% if loop.first %}
+          <li data-src='{{ track.file }}' class="active">
+            {% else %}
+          <li data-src='{{ track.file }}'>
+            {% endif %}
+            <span class="track-title">
+              <strong>
+                {{ loop.index }}</strong>
+              {{ track.title }}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div id="audio-controls">
+      <input type="range" id="seek-bar" value="0">
+      <div class="audio-time">
+        <span id="current-time">0:00</span> / <span id="duration">0:00</span>
+      </div>
+      <button id="play-pause">Play</button>
+      <button id="next">Next</button>
+      <button id="previous">Previous</button>
+    </div>
+
+    <audio id="audio-player">
+      {% for track in tracks[:1] %}
+      <source id="audio-source" src="{{ track.file }}" type="audio/mpeg">
+      {% endfor %}
       Your browser does not support the audio element.
     </audio>
 
-    <script>
-      function playTrack(file) {
-        const audioPlayer = document.getElementById('audioPlayer');
-        const source = document.getElementById('audioSource');
-        source.src = file;
-        audioPlayer.load();
-        audioPlayer.play();
-      }
+    <script src="{{ url_for('static', filename='js/audio_player.js') }}">
     </script>
     <noscript>
       <p>Enable JavaScript to play audio.</p>
     </noscript>
-    <ul class="playlist">
-      {% if album_art %}
-      <img src="{{ album_art }}" alt="Album cover" class="album-art">
-      {% endif %}
-      {% for track in tracks %}
-      <li onclick="playTrack('{{ track.file }}')">
-        <span class="track-title">
-          {{ loop.index }}
-          {{ track.title }}
-        </span>
-      </li>
-      {% endfor %}
-    </ul>
 
   </div>
   {% if navigation %}
