@@ -2,7 +2,9 @@
 
 This project is a simple web application that uses Flask, Jinja2, and Markdown to render dynamic HTML pages from markdown files.
 
-The aim of this project is to provide a universal feed reader that can display content from various sources in a consistent and user-friendly manner.
+The aim of this project is to provide a universal chronological feed service that can display content from various sources in a consistent and user-friendly manner. I use this project to host my personal blog, music, and other content. It's intended to be an 'everything' feed that can display blog posts, music, comics, videos, games, and other content types in a single feed.
+
+The project is designed to be easily extensible and customisable to suit different needs. It is built to be easily deployed on Google Cloud Platform, but can be deployed on other platforms with some minor modifications.
 
 All content is rendered from markdown files
 
@@ -15,7 +17,19 @@ Routes implemented allow for:
 
 ## Current Status
 
-I'm working on it. This README is probably out of date if you're reading this. I'll have it organised at some point but I'm working on the actual site first.
+Currently in development but the project provides a good framework for displaying content. The project is currently being used to host my personal blog and music.
+
+This project is a work in progress and is being actively developed.
+
+Future plans include:
+
+* Display filtering options on the feed page
+* RSS feed with filtering options
+* Global navigation (currently navigation is only available within collections)
+* Content management scripts for updating the database and content
+* Possible admin panel for managing content within the application
+
+My personal website may be viewed at [https://homepage-mkmtu6ld5q-nw.a.run.app/](https://homepage-mkmtu6ld5q-nw.a.run.app/).
 
 ## Project Structure
 
@@ -55,7 +69,7 @@ og_image: /assets/images/first_post.jpg
 og_type: article
 collection: Ed's Blog
 ---
-# Hello, World!
+Hello, World!
 
 This is some blog content
 ```
@@ -68,15 +82,17 @@ The firestore database is used to store feed data and collection data. It contai
 
 ### Feed Collection
 
-This collection contains a single document 'content-log'. It is intended to contain the location of content, associated metadata and a timestamp as the key. It is structured of the form:
+This collection contains a single document 'content-log'. It is intended to contain the location of content, url (usually the same as the location with no file extension) associated metadata and a timestamp as the key. It is structured of the form:
 
 ```json
 {'2023-03-05 13:30:15': {
   'location': 'blogs/blog1.md',
+  'url': '/blogs/blog1',
   'metadata_key': 'some_metadata'
 },
 {'2023-03-05 13:30:15': {
   'location': 'music/album1.md',
+  'url': /music/album1',
   'metadata_key': 'some_metadata'
 }
 }
@@ -162,6 +178,48 @@ title: Song Title 2
 file: /assets/music/song2.mp3
 ...
 ```
+
+### Games
+
+Games also contain the additional metadata:
+* game_link
+
+This provides a link to where the game may be downloaded/played.
+
+### Video
+
+Video documents provide a link to a youtube video. The body of the markdown file should be a single line containing the youtube video ID which will be embedded in the page.
+
+### Project
+
+Projects are identical to blog posts but use a separate route.
+
+## Data Routes
+
+### /Assets/images/<img_name>
+
+This route serves images from the Google Cloud Storage bucket. Images are expected to be stored in the `images` directory. Images are served as a BytesIO object.
+
+### /Assets/music/<music_name>
+
+This route serves partial content of music files from the Google Cloud Storage bucket. Music files are expected to be stored in the `music` directory. Music files are served as a BytesIO object.
+
+## Additional Routes and Features
+
+### Random Page
+
+A random page can be accessed by visiting `/random`.
+
+### Filtering
+
+Filters may be passed into the feed via url parameters. For example, to filter by tag, the feed url may have `?tag=first post` appended will only display blog posts with the tag 'first post'.
+
+### Music Player
+
+A music player is included on music pages that allows for the playing of music files. This is managed through javascript with the script located in `static/js/music_player.js`.
+
+The music player is a simple HTML5 audio player with custom controls and styling.
+
 
 ## Running the Application
 
