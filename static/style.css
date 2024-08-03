@@ -529,4 +529,7 @@ input[type="range"]::-moz-range-thumb {
     justify-content: left;
   }
 
+  #audio-controls button {
+    margin-bottom: 0.5em;
+  }
 }
