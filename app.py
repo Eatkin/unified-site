@@ -1,10 +1,14 @@
 import os
 from random import choice
 from io import BytesIO
+from datetime import datetime as dt
 
 from flask import Flask, render_template, send_file, abort, request, redirect, Response
 from google.cloud import storage
 from firebase_admin import firestore, initialize_app
+
+import pytz
+from feedgen.feed import FeedGenerator
 
 from utils.md_parser import markdown_parser
 from utils.string_utils import strip_punctuation
@@ -440,6 +444,66 @@ def random():
     url = get_random_page()
     # Redirect
     return redirect(url)
+
+
+# RSS
+@app.route('/rss')
+def rss():
+    base_url = os.environ.get('BASE_URL', 'https://homepage-mkmtu6ld5q-nw.a.run.app/')
+
+    feed = FeedGenerator()
+    feed.id(base_url)
+    feed.title('Edward Atkin\'s Homepage')
+    feed.link(href=base_url, rel='alternate')
+    feed.description('The personal website of Edward Atkin')
+    feed.language('en')
+    feed.ttl(3600)
+
+    # Get the feed from Firestore
+    data = db.collection('feed').document('content-log').get().to_dict()
+    # Sort
+    data = dict(sorted(data.items(), key=lambda item: item[0], reverse=True))
+
+    # Get the latest date for the feed last build date
+    latest_date = list(data.keys())[0]
+    # Parse it
+    latest_date = dt.strptime(latest_date, "%Y-%m-%d %H:%M:%S")
+    # Timezone
+    latest_date = pytz.timezone('Europe/London').localize(latest_date)
+
+    # Now set the last build date
+    feed.lastBuildDate(latest_date)
+
+    num_items = 10
+
+    # Feedgen expects oldest first so we need to reverse the data shrug emoji
+    reversed_data = list(data.items())[:num_items][::-1]
+
+    for date, v in reversed_data:
+        # Create an entry for each item in the feed
+        entry = feed.add_entry()
+        entry.id(f'{base_url}{v["url"]}')
+        entry.title(v['title'])
+        entry.link(href=f'{base_url}{v["url"]}', rel='alternate')
+        entry.description(v['description'])
+        pub_date = dt.strptime(date, "%Y-%m-%d %H:%M:%S")
+        # Localise to London
+        pub_date = pytz.timezone('Europe/London').localize(pub_date)
+        entry.pubDate(pub_date)
+
+        if 'og_image' in v:
+            # Ext should be jpg or png - get mimetype from the extension
+            ext = v['og_image'].split('.')[-1]
+            mime_type = f'image/{ext}'.lower()
+            # If it says jpg then it should be jpeg
+            if ext.lower() == 'jpg':
+                mime_type = 'image/jpeg'
+            entry.enclosure(f'{base_url[:-1]}{v["og_image"]}', 0, mime_type)
+
+    return Response(
+        feed.rss_str(pretty=True),
+        mimetype='application/rss+xml'
+    )
 
 
 
