@@ -179,7 +179,7 @@ article {
 }
 
 article img {
-  width: 50%;
+  min-width: 50%;
   border-radius: 1rem;
   display: block;
   margin: auto;

@@ -10,38 +10,38 @@
     {{ date }}
   </date>
   {{ content | safe }}
-</article>
 
-{% if navigation %}
-<div class="nav">
-  <p>More from
-    {{ collection }}
-  </p>
-  <ul class="nav-list">
-    {% if navigation.first %}
-    <li class="nav-item">
-      <a href="{{ url_for('project', project_name=navigation.first) }}">First project</a>
-    </li>
+  {% if navigation %}
+  <div class="nav">
+    <p>More from
+      {{ collection }}
+    </p>
+    <ul class="nav-list">
+      {% if navigation.first %}
+      <li class="nav-item">
+        <a href="{{ url_for('project', project_name=navigation.first) }}">First project</a>
+      </li>
+      {% endif %}
+      {% if navigation.prev %}
+      <li class="nav-item">
+        <a href="{{ url_for('project', project_name=navigation.prev) }}">Previous project</a>
+      </li>
+      {% endif %}
+      {% if navigation.next %}
+      <li class="nav-item">
+        <a href="{{ url_for('project', project_name=navigation.next) }}">Next project</a>
+      </li>
+      {% endif %}
+      {% if navigation.last %}
+      <li class="nav-item">
+        <a href="{{ url_for('project', project_name=navigation.last) }}">Latest project</a>
+      </li>
+      {% endif %}
+    </ul>
+    {% if recommendations %}
+    {% include 'components/recommendations.html' %}
     {% endif %}
-    {% if navigation.prev %}
-    <li class="nav-item">
-      <a href="{{ url_for('project', project_name=navigation.prev) }}">Previous project</a>
-    </li>
-    {% endif %}
-    {% if navigation.next %}
-    <li class="nav-item">
-      <a href="{{ url_for('project', project_name=navigation.next) }}">Next project</a>
-    </li>
-    {% endif %}
-    {% if navigation.last %}
-    <li class="nav-item">
-      <a href="{{ url_for('project', project_name=navigation.last) }}">Latest project</a>
-    </li>
-    {% endif %}
-  </ul>
-  {% if recommendations %}
-  {% include 'components/recommendations.html' %}
-  {% endif %}
-</div>
+  </div>
+</article>
 {% endif %}
 {% endblock %}
