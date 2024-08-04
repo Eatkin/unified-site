@@ -88,7 +88,7 @@ def calculate_similarity(vectors):
     similarity_matrix = cosine_similarity(vectors, vectors)
     return similarity_matrix
 
-def get_recommendations(similarity_matrix, for_vectorisation, num_recs=5):
+def get_recommendations(similarity_matrix, for_vectorisation, num_recs=6):
     # Get the recommendations
     recommendations = defaultdict(list)
     for i, doc in enumerate(for_vectorisation):

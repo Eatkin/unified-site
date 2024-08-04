@@ -39,6 +39,9 @@
     </li>
     {% endif %}
   </ul>
+  {% if recommendations %}
+  {% include 'components/recommendations.html' %}
+  {% endif %}
 </div>
 {% endif %}
 {% endblock %}

@@ -1,22 +1,22 @@
-<div class="recommendations">
-  <h2>
-    More like this
-  </h2>
-  {% for r in recommendations %}
-  <div class="recommendation">
-    {% if r.og_image %}
-    <a href="{{ r.url }}" target="_blank">
-      <img src="{{ r.og_image }}" alt="{{ r.title }}">
-    </a>
-    {% endif %}
-    <a href="{{ r.url }}" target="_blank">
-      <h3>
-        {{ r.title }}
-      </h3>
-    </a>
-    <p>
-      {{ r.description }}
-    </p>
+  <div class="recommendations">
+    <h2 class="more">More like this:</h2>
+    {% for r in recommendations %}
+    <div class="recommendation">
+      {% if r.thumbnail %}
+      <a href="{{ r.url }}" target="_blank">
+        <img class="recommendation-img" src="{{ r.thumbnail }}" alt="{{ r.title }}">
+      </a>
+      {% endif %}
+      <div class="recommendation-text">
+        <a href="{{ r.url }}" target="_self">
+          <h3>
+            {{ r.title }}
+          </h3>
+        </a>
+        <p class="recommendation-description">
+          {{ r.description }}
+        </p>
+      </div>
+    </div>
+    {% endfor %}
   </div>
-  {% endfor %}
-</div>

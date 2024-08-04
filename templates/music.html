@@ -90,6 +90,9 @@
     </ul>
   </div>
   {% endif %}
+  {% if recommendations %}
+  {% include 'components/recommendations.html' %}
+  {% endif %}
 </article>
 
 {% endblock %}

@@ -3,7 +3,7 @@ from random import choice
 from io import BytesIO
 from datetime import datetime as dt
 
-from flask import Flask, render_template, send_file, abort, request, redirect, Response
+from flask import Flask, render_template, send_file, abort, request, redirect, Response, url_for
 from google.cloud import storage
 from firebase_admin import firestore, initialize_app
 
@@ -135,9 +135,20 @@ def get_recommendations(blob_name):
         for k, v in feed.items():
             if v['location'] in recs:
                 rec_details.append(v)
+                # Modify the url using this jankey method
+                arg = v['url'].split('/')[-1]
+                rec_details[-1]['url'] = {
+                    'project': url_for('project', project_name=arg),
+                    'blog': url_for('blog', blog_name=arg),
+                    'comic': url_for('comic', comic_name=arg),
+                    'music': url_for('music', collection_name=arg),
+                    'video': url_for('video', video_name=arg),
+                    'game': url_for('game', game_name=arg),
+                }[v['type']]
 
         return rec_details
     except Exception as e:
+        print(e)
         return None
 
 
@@ -315,8 +326,10 @@ def project(project_name):
     # get the navigation for the collection
     navigation = get_collection_navigation(metadata, blob.name)
 
+    recs = get_recommendations(blob.name)
+
     # render project template
-    return render_template('project.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection)
+    return render_template('project.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, recommendations=recs)
 
 @app.route('/blog/<blog_name>')
 def blog(blog_name):
@@ -360,8 +373,10 @@ def comic(comic_name):
     if hover_text:
         content = content.replace('<img', f'<img title="{hover_text}"')
 
+    recs = get_recommendations(blob.name)
+
     # Render blog template
-    return render_template('comic.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, description=description)
+    return render_template('comic.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, description=description, recommendations=recs)
 
 @app.route('/music/<collection_name>')
 def music(collection_name):
@@ -379,8 +394,10 @@ def music(collection_name):
 
     navigation = get_collection_navigation(data['metadata'], blob.name)
 
+    recs = get_recommendations(blob.name)
+
     # Render music template
-    return render_template('music.html', content=content, og_tags=og_tags, title=title, tracks=tracks, album_art=album_art, navigation=navigation, collection=collection)
+    return render_template('music.html', content=content, og_tags=og_tags, title=title, tracks=tracks, album_art=album_art, navigation=navigation, collection=collection, recommendations=recs)
 
 @app.route('/video/<video_name>')
 def video(video_name):
@@ -401,8 +418,10 @@ def video(video_name):
     # Get the navigation for the collection
     navigation = get_collection_navigation(metadata, blob.name)
 
+    recs = get_recommendations(blob.name)
+
     # Render blog template
-    return render_template('video.html', video_id=video_id, description=description, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection)
+    return render_template('video.html', video_id=video_id, description=description, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, recommendations=recs)
 
 @app.route('/game/<game_name>')
 def game(game_name):
@@ -421,8 +440,10 @@ def game(game_name):
     # get the navigation for the collection
     navigation = get_collection_navigation(metadata, blob.name)
 
+    recs = get_recommendations(blob.name)
+
     # render blog template
-    return render_template('game.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, cover_art=cover_art, game_link=game_link)
+    return render_template('game.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, cover_art=cover_art, game_link=game_link, recommendations=recs)
 
 
 
