@@ -3,7 +3,7 @@
     {% for r in recommendations %}
     <div class="recommendation">
       {% if r.thumbnail %}
-      <a href="{{ r.url }}" target="_blank">
+      <a href="{{ r.url }}" target="_self">
         <img class="recommendation-img" src="{{ r.thumbnail }}" alt="{{ r.title }}">
       </a>
       {% endif %}
