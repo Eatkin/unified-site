@@ -1,5 +1,5 @@
 import os
-from random import choice
+from random import choice, shuffle
 from io import BytesIO
 from datetime import datetime as dt
 
@@ -146,6 +146,9 @@ def get_recommendations(blob_name):
                     'game': url_for('game', game_name=arg),
                 }[v['type']]
 
+
+        # Randomise the recommendations
+        shuffle(rec_details)
         return rec_details
     except Exception as e:
         print(e)
