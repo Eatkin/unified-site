@@ -6,3 +6,6 @@ firebase-admin
 pillow
 feedgen
 pytz
+scikit-learn
+pandas
+nltk

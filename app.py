@@ -125,6 +125,21 @@ def get_collection_navigation(metadata, blob_name):
         'last': data['content'][-1] if idx < len(data['content'])-1 else None
     }
 
+def get_recommendations(blob_name):
+    recs = db.collection('recommendations').document('recommendations').get().to_dict()
+    feed = db.collection('feed').document('content-log').get().to_dict()
+    try:
+        recs = recs[blob_name]
+        rec_details = []
+        # Loop over and find metadata
+        for k, v in feed.items():
+            if v['location'] in recs:
+                rec_details.append(v)
+
+        return rec_details
+    except Exception as e:
+        return None
+
 
 def get_og_tags(metadata):
     """Get Open Graph tags from metadata"""
@@ -319,8 +334,10 @@ def blog(blog_name):
     # get the navigation for the collection
     navigation = get_collection_navigation(metadata, blob.name)
 
+    recs = get_recommendations(blob.name)
+
     # render blog template
-    return render_template('blog.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection)
+    return render_template('blog.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, recommendations=recs)
 
 @app.route('/comic/<comic_name>')
 def comic(comic_name):
