@@ -1,5 +1,5 @@
 import os
-from random import choice, shuffle
+from random import choice, choices, shuffle
 from io import BytesIO
 from datetime import datetime as dt
 
@@ -131,20 +131,34 @@ def get_recommendations(blob_name):
     try:
         recs = recs[blob_name]
         rec_details = []
+        for_popping = []
         # Loop over and find metadata
         for k, v in feed.items():
             if v['location'] in recs:
+                for_popping.append(k)
                 rec_details.append(v)
-                # Modify the url using this jankey method
-                arg = v['url'].split('/')[-1]
-                rec_details[-1]['url'] = {
-                    'project': url_for('project', project_name=arg),
-                    'blog': url_for('blog', blog_name=arg),
-                    'comic': url_for('comic', comic_name=arg),
-                    'music': url_for('music', collection_name=arg),
-                    'video': url_for('video', video_name=arg),
-                    'game': url_for('game', game_name=arg),
-                }[v['type']]
+
+
+        # Pop the recommendations from the feed
+        for k in for_popping:
+            feed.pop(k)
+
+        # Also pick out 3 random pages from the feed
+        random_pages = choices(list(feed.keys()), k=3)
+        random_pages = [feed[page] for page in random_pages]
+        rec_details.extend(random_pages)
+        # Format the urls
+        for page in rec_details:
+            arg = page['url'].split('/')[-1]
+            page['url'] = {
+                'project': url_for('project', project_name=arg),
+                'blog': url_for('blog', blog_name=arg),
+                'comic': url_for('comic', comic_name=arg),
+                'music': url_for('music', collection_name=arg),
+                'video': url_for('video', video_name=arg),
+                'game': url_for('game', game_name=arg),
+            }[page['type']]
+
 
 
         # Randomise the recommendations
