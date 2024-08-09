@@ -340,6 +340,8 @@ def get_music(filename):
 @app.route('/<content_type>/<content_name>')
 def content(content_type, content_name):
     blob = get_blob(content_type, content_name + '.md')
+
+    # Any special handling for music or video etc
     content = None
     tracks = None
     video_id = None
