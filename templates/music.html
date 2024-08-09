@@ -61,38 +61,7 @@
     </noscript>
 
   </div>
-  {% if navigation %}
-  <div class="nav">
-    <p>More from
-      {{ collection }}:
-    </p>
-    <ul class="nav-list">
-      {% if navigation.first %}
-      <li class="nav-item">
-        <a href="{{ url_for('music', collection_name=navigation.first) }}">First post</a>
-      </li>
-      {% endif %}
-      {% if navigation.prev %}
-      <li class="nav-item">
-        <a href="{{ url_for('music', collection_name=navigation.prev) }}">Previous post</a>
-      </li>
-      {% endif %}
-      {% if navigation.next %}
-      <li class="nav-item">
-        <a href="{{ url_for('music', collection_name=navigation.next) }}">Next post</a>
-      </li>
-      {% endif %}
-      {% if navigation.last %}
-      <li class="nav-item">
-        <a href="{{ url_for('music', collection_name=navigation.last) }}">Latest post</a>
-      </li>
-      {% endif %}
-    </ul>
-  </div>
-  {% endif %}
-  {% if recommendations %}
-  {% include 'components/recommendations.html' %}
-  {% endif %}
+  {% include 'components/nav.html' %}
 </article>
 
 {% endblock %}

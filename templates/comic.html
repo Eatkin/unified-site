@@ -23,22 +23,22 @@
     <ul class="nav-list">
       {% if navigation.first %}
       <li class="nav-item">
-        <a href="{{ url_for('comic', comic_name=navigation.first) }}"><img src="{{ url_for('serve_image', img_name='comic_first.png') }}"></a>
+        <a href="{{ url_for('content', content_type=type, content_name=navigation.first) }}"><img src="{{ url_for('serve_image', img_name='comic_first.png') }}"></a>
       </li>
       {% endif %}
       {% if navigation.prev %}
       <li class="nav-item">
-        <a href="{{ url_for('comic', comic_name=navigation.prev) }}"><img src="{{ url_for('serve_image', img_name='comic_prev.png') }}"></a>
+        <a href="{{ url_for('content', content_type=type, content_name=navigation.prev) }}"><img src="{{ url_for('serve_image', img_name='comic_prev.png') }}"></a>
       </li>
       {% endif %}
       {% if navigation.next %}
       <li class="nav-item">
-        <a href="{{ url_for('comic', comic_name=navigation.next) }}"><img src="{{ url_for('serve_image', img_name='comic_next.png') }}"></a>
+        <a href="{{ url_for('content', content_type=type, content_name=navigation.next) }}"><img src="{{ url_for('serve_image', img_name='comic_next.png') }}"></a>
       </li>
       {% endif %}
       {% if navigation.last %}
       <li class="nav-item">
-        <a href="{{ url_for('comic', comic_name=navigation.last) }}"><img src="{{ url_for('serve_image', img_name='comic_last.png') }}"></a>
+        <a href="{{ url_for('content', content_type=type, content_name=navigation.last) }}"><img src="{{ url_for('serve_image', img_name='comic_last.png') }}"></a>
       </li>
       {% endif %}
     </ul>

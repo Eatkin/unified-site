@@ -20,38 +20,7 @@
       {{ title }} at Itch IO!</a>
   </p>
 
-  {% if navigation %}
-  <div class="nav">
-    <p>More from
-      {{ collection }}:
-    </p>
-    <ul class="nav-list">
-      {% if navigation.first %}
-      <li class="nav-item">
-        <a href="{{ url_for('game', game_name=navigation.first) }}">First game</a>
-      </li>
-      {% endif %}
-      {% if navigation.prev %}
-      <li class="nav-item">
-        <a href="{{ url_for('game', game_name=navigation.prev) }}">Previous game</a>
-      </li>
-      {% endif %}
-      {% if navigation.next %}
-      <li class="nav-item">
-        <a href="{{ url_for('game', game_name=navigation.next) }}">Next game</a>
-      </li>
-      {% endif %}
-      {% if navigation.last %}
-      <li class="nav-item">
-        <a href="{{ url_for('game', game_name=navigation.last) }}">Latest game</a>
-      </li>
-      {% endif %}
-    </ul>
-  </div>
-  {% endif %}
-  {% if recommendations %}
-  {% include 'components/recommendations.html' %}
-  {% endif %}
+  {% include 'components/nav.html' %}
 </article>
 
 {% endblock %}

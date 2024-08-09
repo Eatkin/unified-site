@@ -21,6 +21,22 @@ db = firestore.client()
 
 # Globals
 ITEMS_PER_PAGE = 10
+content_types = {
+    'blog': 'blogs',
+    'project': 'projects',
+    'comic': 'comics',
+    'music': 'music',
+    'video': 'videos',
+    'game': 'games'
+}
+router = {
+    'project': 'project.html',
+    'blog': 'blog.html',
+    'comic': 'comic.html',
+    'music': 'music.html',
+    'video': 'video.html',
+    'game': 'game.html'
+}
 
 app = Flask(__name__)
 
@@ -34,6 +50,7 @@ def internal_error(error):
 
 def get_blob(blob_type, name):
     """Get a blob from Google Cloud Storage or abort with a 404 if not found"""
+    blob_type = content_types.get(blob_type, blob_type)
     try:
         blob = bucket.blob(os.path.join(blob_type, name))
         if not blob.exists():
@@ -150,16 +167,7 @@ def get_recommendations(blob_name):
         # Format the urls
         for page in rec_details:
             arg = page['url'].split('/')[-1]
-            page['url'] = {
-                'project': url_for('project', project_name=arg),
-                'blog': url_for('blog', blog_name=arg),
-                'comic': url_for('comic', comic_name=arg),
-                'music': url_for('music', collection_name=arg),
-                'video': url_for('video', video_name=arg),
-                'game': url_for('game', game_name=arg),
-            }[page['type']]
-
-
+            page['url'] = url_for('content', content_type=page['type'], content_name=arg)
 
         # Randomise the recommendations
         shuffle(rec_details)
@@ -329,139 +337,46 @@ def get_music(filename):
     return response
 
 # Content routes
-@app.route('/project/<project_name>')
-def project(project_name):
-    blob = get_blob('projects', project_name + '.md')
-    metadata, content = parse_markdown(blob)
-    og_tags = get_og_tags(metadata)
+@app.route('/<content_type>/<content_name>')
+def content(content_type, content_name):
+    blob = get_blob(content_type, content_name + '.md')
+    content = None
+    tracks = None
+    video_id = None
+    if content_type == 'music':
+        data = parse_music(blob)
+        content = data['content']
+        metadata = data['metadata']
+        tracks = data['track_listing']
+    elif content_type == 'video':
+        metadata, video_id = parse_markdown(blob)
+        video_id = video_id.replace('<p>', '').replace('</p>', '').strip()
+    else:
+        metadata, content = parse_markdown(blob)
 
-    # get title and date from the metadata
-    title = metadata['title']
-    date = metadata['date']
-    collection = metadata['collection']
+    # Use this to get the correct template
+    if not router.get(content_type):
+        abort(404)
 
-    # get the navigation for the collection
-    navigation = get_collection_navigation(metadata, blob.name)
+    # Create our kwargs for the template
+    kwargs = {
+        'content': content,
+        'og_tags': get_og_tags(metadata),
+        'title': metadata['title'],
+        'date': metadata['date'],
+        'type': content_type,
+        'collection': metadata['collection'],
+        'navigation': get_collection_navigation(metadata, blob.name),
+        'recommendations': get_recommendations(blob.name),
+        'description': metadata.get('description', None),
+        'video_id': metadata.get('video_id', None),
+        'cover_art': metadata.get('og_image', None),
+        'game_link': metadata.get('game_link', None),
+        'album_art': metadata.get('og_image', None),
+        'tracks': tracks
+    }
 
-    recs = get_recommendations(blob.name)
-
-    # render project template
-    return render_template('project.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, recommendations=recs)
-
-@app.route('/blog/<blog_name>')
-def blog(blog_name):
-    # we want to get the markdown content, render it and pass the html to the template
-    blob = get_blob('blogs', blog_name + '.md')
-
-    metadata, content = parse_markdown(blob)
-    og_tags = get_og_tags(metadata)
-
-    # get title and date from the metadata
-    title = metadata['title']
-    date = metadata['date']
-    collection = metadata['collection']
-
-    # get the navigation for the collection
-    navigation = get_collection_navigation(metadata, blob.name)
-
-    recs = get_recommendations(blob.name)
-
-    # render blog template
-    return render_template('blog.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, recommendations=recs)
-
-@app.route('/comic/<comic_name>')
-def comic(comic_name):
-    # Very similar to blog but uses an alternative template
-    blob = get_blob('comics', comic_name + '.md')
-    metadata, content = parse_markdown(blob)
-    og_tags = get_og_tags(metadata)
-
-    # Get title and date from the metadata
-    title = metadata['title']
-    date = metadata['date']
-    description = metadata['description']
-    collection = metadata['collection']
-
-    # Get the navigation for the collection
-    navigation = get_collection_navigation(metadata, blob.name)
-    hover_text = metadata['hover_text'] if 'hover_text' in metadata else None
-
-    # Add hover text to images
-    if hover_text:
-        content = content.replace('<img', f'<img title="{hover_text}"')
-
-    recs = get_recommendations(blob.name)
-
-    # Render blog template
-    return render_template('comic.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, description=description, recommendations=recs)
-
-@app.route('/music/<collection_name>')
-def music(collection_name):
-    # Get the music collection
-    blob = get_blob('music', collection_name + '.md')
-
-    data = parse_music(blob)
-
-    og_tags = get_og_tags(data['metadata'])
-    title = data['metadata']['title']
-    content = data['content']
-    tracks = data['track_listing']
-    album_art = data['metadata']['og_image']
-    collection = data['metadata']['collection']
-
-    navigation = get_collection_navigation(data['metadata'], blob.name)
-
-    recs = get_recommendations(blob.name)
-
-    # Render music template
-    return render_template('music.html', content=content, og_tags=og_tags, title=title, tracks=tracks, album_art=album_art, navigation=navigation, collection=collection, recommendations=recs)
-
-@app.route('/video/<video_name>')
-def video(video_name):
-    # Get the video content
-    blob = get_blob('videos', video_name + '.md')
-
-    metadata, video_id = parse_markdown(blob)
-    # Strip html tags from the video_id
-    video_id = video_id.replace('<p>', '').replace('</p>', '').strip()
-    og_tags = get_og_tags(metadata)
-
-    # Get title and date from the metadata
-    title = metadata['title']
-    date = metadata['date']
-    collection = metadata['collection']
-    description = metadata['description']
-
-    # Get the navigation for the collection
-    navigation = get_collection_navigation(metadata, blob.name)
-
-    recs = get_recommendations(blob.name)
-
-    # Render blog template
-    return render_template('video.html', video_id=video_id, description=description, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, recommendations=recs)
-
-@app.route('/game/<game_name>')
-def game(game_name):
-    # we want to get the markdown content, render it and pass the html to the template
-    blob = get_blob('games', game_name + '.md')
-    metadata, content = parse_markdown(blob)
-    og_tags = get_og_tags(metadata)
-
-    # get title and date from the metadata
-    title = metadata['title']
-    date = metadata['date']
-    collection = metadata['collection']
-    cover_art = metadata['og_image']
-    game_link = metadata['game_link']
-
-    # get the navigation for the collection
-    navigation = get_collection_navigation(metadata, blob.name)
-
-    recs = get_recommendations(blob.name)
-
-    # render blog template
-    return render_template('game.html', content=content, og_tags=og_tags, title=title, date=date, navigation=navigation, collection=collection, cover_art=cover_art, game_link=game_link, recommendations=recs)
-
+    return render_template(router[content_type], **kwargs)
 
 
 @app.route('/')

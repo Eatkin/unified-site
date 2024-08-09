@@ -16,37 +16,6 @@
     <iframe width="560" height="315" src="https://www.youtube.com/embed/{{ video_id }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
   </div>
 
-  {% if navigation %}
-  <div class="nav">
-    <p>More from
-      {{ collection }}
-    </p>
-    <ul class="nav-list">
-      {% if navigation.first %}
-      <li class="nav-item">
-        <a href="{{ url_for('video', video_name=navigation.first) }}">First video</a>
-      </li>
-      {% endif %}
-      {% if navigation.prev %}
-      <li class="nav-item">
-        <a href="{{ url_for('video', video_name=navigation.prev) }}">Previous video</a>
-      </li>
-      {% endif %}
-      {% if navigation.next %}
-      <li class="nav-item">
-        <a href="{{ url_for('video', video_name=navigation.next) }}">Next video</a>
-      </li>
-      {% endif %}
-      {% if navigation.last %}
-      <li class="nav-item">
-        <a href="{{ url_for('video', video_name=navigation.last) }}">Latest video</a>
-      </li>
-      {% endif %}
-    </ul>
-  </div>
-  {% endif %}
-  {% if recommendations %}
-  {% include 'components/recommendations.html' %}
-  {% endif %}
+  {% include 'components/nav.html' %}
 </article>
 {% endblock %}
