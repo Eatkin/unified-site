@@ -381,6 +381,7 @@ def content(content_type, content_name):
     return render_template(router[content_type], **kwargs)
 
 
+# Static routes
 @app.route('/')
 def index():
     page = request.args.get('page', 1, type=int)
@@ -409,7 +410,25 @@ def index():
     feed_dict = get_feed(filters=filters, page=page)
     feed = feed_dict['feed']
     pagination = feed_dict['pagination']
-    return render_template('index.html', feed=feed, pagination=pagination)
+    og_tags = {
+        'og:title': 'Edward Atkin\'s Homepage',
+        'og:description': 'The personal website of Edward Atkin',
+        'og:type': 'website',
+        'og:image': '/assets/images/edwardatkin.jpg'
+    }
+    return render_template('index.html', feed=feed, pagination=pagination, og_tags=og_tags)
+
+@app.route('/about')
+def about():
+    blob = get_blob('', 'about.md')
+    _, content = parse_markdown(blob)
+    og_tags = {
+        'og:title': 'Edward Atkin\'s Homepage',
+        'og:description': 'The personal website of Edward Atkin',
+        'og:type': 'website',
+        'og:image': '/assets/images/edwardatkin.jpg'
+    }
+    return render_template('about.html', content=content, og_tags=og_tags)
 
 @app.route('/random')
 def random():
