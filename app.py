@@ -48,6 +48,19 @@ def not_found_error(error):
 def internal_error(error):
     return render_template('error.html', error=error), 500
 
+def register_hit(content_type, content_name):
+    # Register a hit in our hitcounter collection
+    hit_counter_ref = db.collection('hit_counter').document('hits')
+    hit_counter = hit_counter_ref.get().to_dict()
+    key = os.path.join(content_type, content_name)
+    if key in hit_counter:
+        hit_counter[key] += 1
+    else:
+        hit_counter[key] = 1
+
+    hit_counter_ref.set(hit_counter)
+
+
 def get_blob(blob_type, name):
     """Get a blob from Google Cloud Storage or abort with a 404 if not found"""
     blob_type = content_types.get(blob_type, blob_type)
@@ -359,6 +372,9 @@ def content(content_type, content_name):
     # Use this to get the correct template
     if not router.get(content_type):
         abort(404)
+
+    # Register a hit
+    register_hit(content_type, content_name)
 
     # Create our kwargs for the template
     kwargs = {
