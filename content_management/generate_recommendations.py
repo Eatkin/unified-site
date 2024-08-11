@@ -108,9 +108,7 @@ def update_firestore(recommendations):
     except Exception as e:
         print(f"Error updating Firestore: {e}")
 
-
-if __name__ == "__main__":
-
+def main():
     # This script is expected to be run from the root of the project
     # E.g. python content_management/generate_recommendations.py
     for_vectorisation = get_files()
@@ -128,3 +126,7 @@ if __name__ == "__main__":
     print("Recommendations written to recommendations.json")
 
     update_firestore(recommendations)
+
+
+if __name__ == "__main__":
+    main()
