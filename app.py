@@ -406,6 +406,8 @@ def index():
     content_type = request.args.get('type', None)
     collection = request.args.get('collection', None)
 
+    register_hit('homepage', 'index')
+
     # Split them on commas
     tags = tags.split(',') if tags else None
     content_type = content_type.split(',') if content_type else None
@@ -439,6 +441,9 @@ def index():
 @app.route('/<doc>')
 def about(doc):
     blob = get_blob('', f'{doc}.md')
+
+    register_hit('homepage', doc)
+
     _, content = parse_markdown(blob)
     og_tags = {
         'og:title': 'Edward Atkin\'s Homepage',
@@ -450,6 +455,8 @@ def about(doc):
 
 @app.route('/random')
 def random():
+    register_hit('homepage', 'random')
+
     url = get_random_page()
     # Redirect
     return redirect(url)

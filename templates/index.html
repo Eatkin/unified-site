@@ -6,13 +6,13 @@
   <div class="feed-item">
     <div class="flex-row">
       {% if item.thumbnail %}
-      <a href="{{ item.url }}" target="_blank">
+      <a href="{{ item.url }}">
         <img class="thumbnail" src="{{ item.thumbnail }}" alt="{{ item.title }}">
       </a>
       {% endif %}
       <div class="flex-column">
         <h2>
-          <a href="{{ item.url }}" target="_blank">
+          <a href="{{ item.url }}">
             {{ item.title }}
           </a>
         </h2>
