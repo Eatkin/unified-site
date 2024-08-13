@@ -274,6 +274,7 @@ def get_feed(filters={}, page=1):
                 # Clean tags
                 if 'tags' in v:
                     v['tags'] = clean_tags(v['tags'])
+                v['clean_collection'] = strip_punctuation(v['collection']).replace(' ', '_').lower()
                 feed.append(v)
                 feed[-1]['date'] = k
 
@@ -434,9 +435,10 @@ def index():
     }
     return render_template('index.html', feed=feed, pagination=pagination, og_tags=og_tags)
 
-@app.route('/about')
-def about():
-    blob = get_blob('', 'about.md')
+# Static routes for misc docs like about, browse by collection, etc
+@app.route('/<doc>')
+def about(doc):
+    blob = get_blob('', f'{doc}.md')
     _, content = parse_markdown(blob)
     og_tags = {
         'og:title': 'Edward Atkin\'s Homepage',
@@ -444,7 +446,7 @@ def about():
         'og:type': 'website',
         'og:image': '/assets/images/edwardatkin.jpg'
     }
-    return render_template('about.html', content=content, og_tags=og_tags)
+    return render_template('misc_doc.html', content=content, og_tags=og_tags)
 
 @app.route('/random')
 def random():

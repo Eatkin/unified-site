@@ -18,11 +18,12 @@
         </h2>
         <h3>
           From
-          {{ item.collection }}
+          <a href="{{ url_for('index', collection=item.clean_collection) }}">
+            {{ item.collection }}</a>
         </h3>
       </div>
     </div>
-    <div class="flex-column">
+    <div class=" flex-column">
       <p><strong>Date:</strong>
         {{ item.date }}
       </p>

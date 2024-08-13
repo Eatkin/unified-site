@@ -14,9 +14,9 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "service_account.json"
 initialize_app()
 db = firestore.client()
 
-# Compile re patterns
-img_pattern = re.compile(r"/assets/(images/.*?)\s|$")
-music_pattern = re.compile(r"/assets/(music/.*?)\s|$")
+# Compile re patterns - these capture the relative path to the media
+img_pattern = re.compile(r"/assets/(images/[\S]+)")
+music_pattern = re.compile(r"/assets/(music/[\S]+)")
 
 def get_site_update():
     # Find all the new content
@@ -46,7 +46,7 @@ def parse_markdown(docs):
                 metadata_dict[key] = value.strip()
 
         # Get the related media
-        related_media = get_related_media(content)
+        related_media = get_related_media(doc_content)
         metadata_dict["related_media"] = related_media
         doc_metadata[doc] = metadata_dict
 
