@@ -10,3 +10,5 @@ test-dir/awesome-blog-post-thumbnail.jpg test-dir/test-blog.md
 STAGING/*
 CONTENT/*
 recommendations.json
+.gcloudignore
+app.yaml

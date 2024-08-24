@@ -9,3 +9,5 @@ pytz
 scikit-learn
 pandas
 nltk
+pyrebase4
+Flask-Limiter

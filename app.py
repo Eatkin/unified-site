@@ -1,21 +1,25 @@
 import os
+import logging
 from random import choice, choices, shuffle
 from io import BytesIO
 from datetime import datetime as dt
-
-from flask import Flask, render_template, send_file, abort, request, redirect, Response, url_for
-from google.cloud import storage
-from firebase_admin import firestore, initialize_app
+from functools import wraps
 
 import pytz
+from flask import Flask, render_template, send_file, abort, request, redirect, Response, url_for, session
+from google.cloud import storage
+from firebase_admin import firestore, initialize_app
 from feedgen.feed import FeedGenerator
+from pyrebase import pyrebase
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from utils.md_parser import markdown_parser
 from utils.string_utils import strip_punctuation
 
 # Establish a connection to the Google Cloud Storage and Firestore
 storage_client = storage.Client()
-bucket = storage_client.bucket('website-content12345')
+bucket = storage_client.bucket('website-content54321')
 initialize_app()
 db = firestore.client()
 
@@ -40,6 +44,14 @@ router = {
 
 app = Flask(__name__)
 
+# Set up rate limiting
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"]
+)
+
+
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('error.html', error=error), 404
@@ -47,6 +59,50 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('error.html', error=error), 500
+
+# Decorator for protected routes
+def login_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if 'user' not in session:
+            return redirect(url_for('index'))
+        else:
+            # Validate the auth token
+            try:
+                auth.get_account_info(session['user']['idToken'])
+            except Exception as e:
+                logging.error(e)
+                print(e)
+                try:
+                    # If it's expired we can refresh it
+                    refresh_token = session['user']['refreshToken']
+                    res = auth.refresh(refresh_token)
+                    # Udpate session
+                    session['user']['idToken'] = res['idToken']
+                    session['user']['refreshToken'] = res['refreshToken']
+                except Exception as e:
+                    print(e)
+                    logging.error(e)
+                    return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return wrapper
+
+def init_auth():
+    pyrebase_config = {
+        'apiKey': os.environ.get('FIREBASE_API_KEY'),
+        'authDomain': os.environ.get('FIREBASE_AUTH_DOMAIN'),
+        'databaseURL': os.environ.get('FIREBASE_DATABASE_URL'),
+        'projectId': os.environ.get('FIREBASE_PROJECT_ID'),
+        'storageBucket': os.environ.get('FIREBASE_STORAGE_BUCKET'),
+        'messagingSenderId': os.environ.get('FIREBASE_MESSAGING_SENDER_ID'),
+        'appId': os.environ.get('FIREBASE_APP_ID'),
+    }
+    auth_app = pyrebase.initialize_app(pyrebase_config)
+    auth = auth_app.auth()
+    return auth
+
+auth = init_auth()
+app.secret_key = os.environ.get('APP_SECRET_KEY')
 
 def register_hit(content_type, content_name):
     # Register a hit in our hitcounter collection
@@ -461,6 +517,34 @@ def random():
     # Redirect
     return redirect(url)
 
+@app.route('/login')
+def login_get():
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return '', 204
+
+@app.route('/admin')
+@login_required
+def admin():
+    return "Hello this is the admin panel lol!"
+
+@app.route('/auth/login', methods=['POST'])
+@limiter.limit('5 per hour')
+def login_post():
+    email = request.form['username']
+    password = request.form['password']
+
+    try:
+        user = auth.sign_in_with_email_and_password(email, password)
+        session['user'] = user
+        return redirect(url_for('admin'))
+    except Exception as e:
+        print(e)
+        logging.error(e)
+        return redirect(url_for('index'))
 
 # RSS
 @app.route('/rss')
