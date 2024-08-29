@@ -137,9 +137,12 @@ def move_files(doc_metadata):
         # Now move the related media
         related_media = metadata["related_media"]
         for media in related_media:
-            media_path = os.path.join("STAGING", media)
-            copy(media_path, media_path.replace("STAGING", "CONTENT"))
-            print(f"Copied {media_path} to CONTENT")
+            media_path = os.path.join(os.getcwd(), "STAGING", media)
+            try:
+                copy(media_path, media_path.replace("STAGING", "CONTENT"))
+                print(f"Copied {media_path} to CONTENT")
+            except:
+                print(f"Could not find {media_path} in STAGING, it hasn't been moved as expected")
 
 def cleanup_files(doc_metadata):
     for doc, metadata in doc_metadata.items():
@@ -152,7 +155,7 @@ def cleanup_files(doc_metadata):
         # Now remove the related media
         related_media = metadata["related_media"]
         for media in related_media:
-            media_path = os.path.join("STAGING", media)
+            media_path = os.path.join(os.getcwd(), "STAGING", media)
             if os.path.exists(media_path.replace("STAGING", "CONTENT")):
                 os.remove(media_path)
                 print(f"Removed {media_path}")
@@ -188,12 +191,12 @@ if __name__ == "__main__":
     # Update the firestore docs
     update_firestore(doc_metadata)
 
+    move_files(doc_metadata)
+
     # Generate recommendations
     generate_recommendations()
 
     print("Generated recommendations")
-
-    move_files(doc_metadata)
 
     cleanup_files(doc_metadata)
 

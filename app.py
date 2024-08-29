@@ -47,8 +47,7 @@ app = Flask(__name__)
 # Set up rate limiting
 limiter = Limiter(
     get_remote_address,
-    app=app,
-    default_limits=["200 per day", "50 per hour"]
+    app=app
 )
 
 
