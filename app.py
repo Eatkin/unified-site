@@ -447,7 +447,8 @@ def content(content_type, content_name):
         'cover_art': metadata.get('og_image', None),
         'game_link': metadata.get('game_link', None),
         'album_art': metadata.get('og_image', None),
-        'tracks': tracks
+        'tracks': tracks,
+        'hover_text': metadata.get('hover_text', None),
     }
 
     return render_template(router[content_type], **kwargs)

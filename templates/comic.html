@@ -49,4 +49,14 @@
   {% endif %}
 </article>
 
+<script>
+  // Set the title of the comic
+  const article = document.querySelector('article');
+  const comic = article.querySelector('img');
+  // If hover_text isn't None then set the title attribute of the first image to the hover_text
+  if (`{{ hover_text }}` !== null) {
+    comic.title = `{{ hover_text | safe }}`;
+  }
+</script>
+
 {% endblock %}
