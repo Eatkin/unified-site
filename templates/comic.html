@@ -54,7 +54,8 @@
   const article = document.querySelector('article');
   const comic = article.querySelector('img');
   // If hover_text isn't None then set the title attribute of the first image to the hover_text
-  if (`{{ hover_text }}` !== null) {
+  // This of course doesn't work if the hover_text is literally None but why would you do that?
+  if (`{{ hover_text }}` !== "None") {
     comic.title = `{{ hover_text | safe }}`;
   }
 </script>
