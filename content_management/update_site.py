@@ -45,7 +45,7 @@ def parse_markdown(docs):
         metadata_dict = {}
         for line in metadata.split("\n"):
             if line:
-                key, value = line.split(":")
+                key, value = line.split(":", 1)
                 metadata_dict[key] = value.strip()
 
         # Get the related media
