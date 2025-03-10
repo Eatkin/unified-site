@@ -1,3 +1,8 @@
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 import os
 import re
 import subprocess
@@ -121,6 +126,10 @@ def update_firestore(docs_metadata):
 
         collection_ref = db.collection("collections").document(collection)
         collection_dict = collection_ref.get().to_dict()
+        if not collection_dict:
+            collection_dict = {
+                'content': [],
+            }
         collection_dict['content'].append(doc.split("/")[-1])
 
         print(collection_dict)
