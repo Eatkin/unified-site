@@ -42,7 +42,6 @@ def block_php_requests():
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["10 per minute"]
 )
 
 setup_routing(app)
@@ -177,6 +176,7 @@ def get_pagination_info(page, feed):
     }
 
 # Content routes
+@limiter.limit('10 per minute')
 @app.route('/<content_type>/<content_name>')
 def content(content_type, content_name):
     blob = get_blob(content_type, content_name + '.md')
@@ -195,6 +195,7 @@ def content(content_type, content_name):
         video_id = data['content']
         metadata = data['metadata']
         video_id = video_id.replace('<p>', '').replace('</p>', '').strip()
+        content = ""
     else:
         data = parse_from_blob(blob)
         metadata = data['metadata']
@@ -230,6 +231,7 @@ def content(content_type, content_name):
 
 
 # Static routes
+@limiter.limit('10 per minute')
 @app.route('/')
 def index():
     page = request.args.get('page', 1, type=int)
@@ -260,6 +262,7 @@ def index():
     return render_template('index.html', feed=feed, pagination=pagination, og_tags=og_tags)
 
 # Static routes for misc docs like about, browse by collection, etc
+@limiter.limit('10 per minute')
 @app.route('/<doc>')
 def about(doc):
     blob = get_blob('', f'{doc}.md')
@@ -276,6 +279,7 @@ def about(doc):
     }
     return render_template('misc_doc.html', content=content, og_tags=og_tags)
 
+@limiter.limit('10 per minute')
 @app.route('/random')
 def random():
     register_hit('homepage', 'random')
