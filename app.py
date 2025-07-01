@@ -33,10 +33,16 @@ from api import (
 
 app = Flask(__name__)
 
+@app.before_request
+def block_php_requests():
+    if request.path.lower().endswith(".php"):
+        abort(404)
+
 # Set up rate limiting
 limiter = Limiter(
     get_remote_address,
-    app=app
+    app=app,
+    default_limits=["10 per minute"]
 )
 
 setup_routing(app)
@@ -278,34 +284,35 @@ def random():
     # Redirect
     return redirect(url)
 
-@app.route('/login')
-def login_get():
-    return render_template('login.html')
+# Unused auth routes I never got around to implementing and now don't need
+# @app.route('/login')
+# def login_get():
+#     return render_template('login.html')
 
-@app.route('/logout')
-def logout():
-    session.pop('user', None)
-    return '', 204
+# @app.route('/logout')
+# def logout():
+#     session.pop('user', None)
+#     return '', 204
 
-@app.route('/admin')
-@login_required
-def admin():
-    return "Hello this is the admin panel lol!"
+# @app.route('/admin')
+# @login_required
+# def admin():
+#     return "Hello this is the admin panel lol!"
 
-@app.route('/auth/login', methods=['POST'])
-@limiter.limit('5 per hour')
-def login_post():
-    email = request.form['username']
-    password = request.form['password']
+# @app.route('/auth/login', methods=['POST'])
+# @limiter.limit('5 per hour')
+# def login_post():
+#     email = request.form['username']
+#     password = request.form['password']
 
-    try:
-        user = AUTH.sign_in_with_email_and_password(email, password)
-        session['user'] = user
-        return redirect(url_for('admin'))
-    except Exception as e:
-        print(e)
-        logging.error(e)
-        return redirect(url_for('index'))
+#     try:
+#         user = AUTH.sign_in_with_email_and_password(email, password)
+#         session['user'] = user
+#         return redirect(url_for('admin'))
+#     except Exception as e:
+#         print(e)
+#         logging.error(e)
+#         return redirect(url_for('index'))
 
 # RSS
 @app.route('/rss')
