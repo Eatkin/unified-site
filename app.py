@@ -192,10 +192,9 @@ def content(content_type, content_name):
         tracks = data['track_listing']
     elif content_type == 'video':
         data = parse_from_blob(blob)
-        video_id = data['content']
+        video_id = data['markdown']
         metadata = data['metadata']
         video_id = video_id.replace('<p>', '').replace('</p>', '').strip()
-        content = ""
     else:
         data = parse_from_blob(blob)
         metadata = data['metadata']
