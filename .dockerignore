@@ -1,0 +1,13 @@
+CONTENT/*
+content_management/*
+STAGING/*
+.envrc
+.gcloudignore
+.python-version
+app.yaml
+Makefile
+*.ipynb
+README.md
+service_account.json
+test_api.py
+requirements.txt

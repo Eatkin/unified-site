@@ -8,11 +8,9 @@ from functools import wraps
 import pytz
 from flask import Flask, render_template, send_file, abort, request, redirect, Response, url_for, session
 from feedgen.feed import FeedGenerator
-from pyrebase import pyrebase
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
-from utils.auth import login_required, AUTH
 from utils.common import (
     ITEMS_PER_PAGE,
     CONTENT_TYPES,
