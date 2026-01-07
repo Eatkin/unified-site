@@ -17,19 +17,9 @@ Routes implemented allow for:
 
 ## Current Status
 
-Currently in development but the project provides a good framework for displaying content. The project is currently being used to host my personal blog and music.
+No active development. The project is currently being used to host my personal blog, music and more.
 
-This project is a work in progress and is being actively developed.
-
-Future plans include:
-
-* Display filtering options on the feed page
-* RSS feed with filtering options
-* Global navigation (currently navigation is only available within collections)
-* Content management scripts for updating the database and content
-* Possible admin panel for managing content within the application
-
-My personal website may be viewed at [https://homepage-mkmtu6ld5q-nw.a.run.app/](https://homepage-mkmtu6ld5q-nw.a.run.app/).
+My personal website may be viewed at [https://www.edwardatkin.co.uk](https://www.edwardatkin.co.uk).
 
 ## Project Structure
 
